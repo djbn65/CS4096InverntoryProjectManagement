@@ -1,1 +1,1 @@
-# CS4096InverntoryProjectManagement
+# Inventory and Project Management Desktop Application

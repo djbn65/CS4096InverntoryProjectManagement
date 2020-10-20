@@ -34,44 +34,78 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <SineEase x:Key="FlipEase" EasingMode="EaseInOut" />
     </UserControl.Resources>
 
-    <materialDesign:Card
-        materialDesign:ShadowAssist.ShadowDepth="Depth3"
-        UniformCornerRadius="5"
-        Name="Card"
-        RenderTransformOrigin="0.5, 0.5"
-        Cursor="Hand">
-        <materialDesign:Card.Triggers>
-            <EventTrigger RoutedEvent="materialDesign:Card.MouseEnter">
+    <materialDesign:Flipper
+            materialDesign:ShadowAssist.ShadowDepth="Depth3"
+            RenderTransformOrigin="0.5, 0.5"
+            Style="{StaticResource MaterialDesignCardFlipper}"
+            Cursor="Hand"
+            Name="Card"
+            MouseEnter="Card_MouseEnter"
+            MouseLeave="Card_MouseLeave"
+            MouseLeftButtonDown="Card_MouseLeftButtonDown">
+        <materialDesign:Flipper.Triggers>
+            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseEnter">
                 <BeginStoryboard>
                     <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="Card"
-                                    To="1.02" Duration="0:0:0.2" />
-                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="Card"
-                                    To="1.02" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="ScaleX" Storyboard.TargetName="ScaleTransform"
+                                    To="{Binding CurrentScaleX}" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="ScaleY" Storyboard.TargetName="ScaleTransform"
+                                    To="{Binding CurrentScaleY}" Duration="0:0:0.2" />
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-            <EventTrigger RoutedEvent="materialDesign:Card.MouseLeave">
+            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseLeave">
                 <BeginStoryboard>
                     <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" Storyboard.TargetName="Card"
-                                    To="1.0" Duration="0:0:0.2" />
-                        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" Storyboard.TargetName="Card"
-                                    To="1.0" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="ScaleX" Storyboard.TargetName="ScaleTransform"
+                                    To="{Binding CurrentScaleX}" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="ScaleY" Storyboard.TargetName="ScaleTransform"
+                                    To="{Binding CurrentScaleY}" Duration="0:0:0.2" />
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-        </materialDesign:Card.Triggers>
+            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseLeftButtonDown">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="ScaleX"
+                            Storyboard.TargetName="ScaleTransform"
+                            To="{Binding CurrentScaleX}"
+                            Duration="0:0:0.2"
+                            Completed="CardFlip_Completed" />
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="ScaleY"
+                            Storyboard.TargetName="ScaleTransform"
+                            To="{Binding CurrentScaleY}"
+                            Duration="0:0:0.2" />
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="X"
+                            Storyboard.TargetName="TranslateTransform"
+                            To="{Binding CurrentTranslateX}"
+                            Duration="0:0:0.3" />
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Y"
+                            Storyboard.TargetName="TranslateTransform"
+                            To="{Binding CurrentTranslateY}"
+                            Duration="0:0:0.3" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </materialDesign:Flipper.Triggers>
 
-        <materialDesign:Card.RenderTransform>
-            <ScaleTransform />
-        </materialDesign:Card.RenderTransform>
+        <materialDesign:Flipper.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform x:Name="ScaleTransform" />
+                <TranslateTransform x:Name="TranslateTransform" />
+            </TransformGroup>
+        </materialDesign:Flipper.RenderTransform>
 
-        <Grid>
-            <Grid
-                Panel.ZIndex="0">
+        <materialDesign:Flipper.FrontContent>
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="175" />
                     <RowDefinition Height="*" />
@@ -84,41 +118,42 @@
                     </Viewbox>
                 </materialDesign:ColorZone>
                 <Image
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Stretch="UniformToFill"
-                    Source="{Binding ImgPath, TargetNullValue={x:Null}}"
-                    Visibility="{Binding ImgPath, Converter={StaticResource ImgPathVisibilityConverter}}"
-                    Panel.ZIndex="1" />
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Stretch="UniformToFill"
+                        Source="{Binding ImgPath, TargetNullValue={x:Null}}"
+                        Visibility="{Binding ImgPath, Converter={StaticResource ImgPathVisibilityConverter}}"
+                        Panel.ZIndex="1" />
                 <StackPanel
-                    Grid.Row="1"
-                    Margin="10, 20, 10, 10">
+                        Grid.Row="1"
+                        Margin="10, 20, 10, 10">
                     <TextBlock
-                        Text="{Binding Title}"
-                        FontSize="25"
-                        HorizontalAlignment="Center" />
+                            Text="{Binding Title}"
+                            FontSize="25"
+                            HorizontalAlignment="Center" />
                     <Grid
-                        Margin="0, 15, 0, 0">
+                            Margin="0, 7, 0, 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <Button
-                            Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
-                            Foreground="{StaticResource PrimaryHueMidBrush}"
-                            BorderBrush="Transparent"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                            ToolTip="Delete">
+                                Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
+                                Foreground="{StaticResource PrimaryHueMidBrush}"
+                                BorderBrush="Transparent"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                ToolTip="Delete"
+                                Name="Delete">
                             <Button.Triggers>
                                 <EventTrigger RoutedEvent="Button.MouseEnter">
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="DeleteBg"
-                                                To="Black"
-                                                Duration="0:0:0.1" />
+                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                    Storyboard.Target="{Binding ElementName=Delete}"
+                                                    To="Black"
+                                                    Duration="0:0:0.1" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
@@ -126,17 +161,17 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="DeleteBg"
-                                                To="Transparent"
-                                                Duration="0:0:0.1" />
+                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                    Storyboard.Target="{Binding ElementName=Delete}"
+                                                    To="Transparent"
+                                                    Duration="0:0:0.1" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
                             </Button.Triggers>
 
                             <Button.Background>
-                                <SolidColorBrush x:Name="DeleteBg" Color="Transparent" Opacity="0.05" />
+                                <SolidColorBrush Color="Transparent" Opacity="0.05" />
                             </Button.Background>
                         </Button>
                         <StackPanel
@@ -144,20 +179,21 @@
                             Grid.Column="1"
                             HorizontalAlignment="Right">
                             <Button
-                                Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
-                                Foreground="{StaticResource SecondaryHueMidBrush}"
-                                BorderBrush="Transparent"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                                ToolTip="Finished">
+                                    Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
+                                    Foreground="{StaticResource SecondaryHueMidBrush}"
+                                    BorderBrush="Transparent"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                    ToolTip="Finished"
+                                    Name="Finished">
                                 <Button.Triggers>
                                     <EventTrigger RoutedEvent="Button.MouseEnter">
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="DoneBg"
-                                                To="Black"
-                                                Duration="0:0:0.1" />
+                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        Storyboard.Target="{Binding ElementName=Finished}"
+                                                        To="Black"
+                                                        Duration="0:0:0.1" />
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </EventTrigger>
@@ -165,34 +201,36 @@
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="DoneBg"
-                                                To="Transparent"
-                                                Duration="0:0:0.1" />
+                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        Storyboard.Target="{Binding ElementName=Finished}"
+                                                        To="Transparent"
+                                                        Duration="0:0:0.1" />
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
 
                                 <Button.Background>
-                                    <SolidColorBrush x:Name="DoneBg" Color="Transparent" Opacity="0.05" />
+                                    <SolidColorBrush Color="Transparent" Opacity="0.05" />
                                 </Button.Background>
                             </Button>
                             <Button
-                                Content="{materialDesign:PackIcon Kind=InformationCircleOutline, Size=25}"
-                                Foreground="{StaticResource SecondaryHueMidBrush}"
-                                BorderBrush="Transparent"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                                ToolTip="More Information">
+                                    Content="{materialDesign:PackIcon Kind=InformationCircleOutline, Size=25}"
+                                    Foreground="{StaticResource SecondaryHueMidBrush}"
+                                    BorderBrush="Transparent"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                    ToolTip="More Information"
+                                    Name="More"
+                                    Click="More_Click">
                                 <Button.Triggers>
                                     <EventTrigger RoutedEvent="Button.MouseEnter">
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="InfoBg"
-                                                To="Black"
-                                                Duration="0:0:0.1" />
+                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        Storyboard.Target="{Binding ElementName=More}"
+                                                        To="Black"
+                                                        Duration="0:0:0.1" />
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </EventTrigger>
@@ -200,23 +238,26 @@
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ColorAnimation
-                                                Storyboard.TargetProperty="Color"
-                                                Storyboard.TargetName="InfoBg"
-                                                To="Transparent"
-                                                Duration="0:0:0.1" />
+                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        Storyboard.Target="{Binding ElementName=More}"
+                                                        To="Transparent"
+                                                        Duration="0:0:0.1" />
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
 
                                 <Button.Background>
-                                    <SolidColorBrush x:Name="InfoBg" Color="Transparent" Opacity="0.05" />
+                                    <SolidColorBrush Color="Transparent" Opacity="0.05" />
                                 </Button.Background>
                             </Button>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
             </Grid>
-        </Grid>
-    </materialDesign:Card>
+        </materialDesign:Flipper.FrontContent>
+        <materialDesign:Flipper.BackContent>
+            <TextBlock>Back will go here</TextBlock>
+        </materialDesign:Flipper.BackContent>
+    </materialDesign:Flipper>
 </UserControl>

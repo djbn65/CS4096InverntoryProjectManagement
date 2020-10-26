@@ -14,7 +14,7 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="Font/#OpenSans-Regular">
-    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="40">
+    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
         <WrapPanel x:Name="MainItems" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
     </ScrollViewer>
 </Window>

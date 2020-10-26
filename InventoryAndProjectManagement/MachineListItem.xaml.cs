@@ -47,8 +47,18 @@ namespace InventoryAndProjectManagement
 
         private void Card_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            CurrentScaleX = CurrentScaleX > 1.02 ? 1 : 3;
-            CurrentScaleY = CurrentScaleY > 1.02 ? 1 : 3;
+            double WindowWidth = Application.Current.MainWindow.ActualWidth;
+            double WindowHeight = Application.Current.MainWindow.ActualHeight;
+
+            if (WindowWidth > WindowHeight)
+            {
+                CurrentScaleX = CurrentScaleY = CurrentScaleX > 1.02 ? 1 : (.9 * WindowHeight / ActualHeight);
+            }
+            else
+            {
+                CurrentScaleX = CurrentScaleY = CurrentScaleX > 1.02 ? 1 : (.9 * WindowWidth / ActualWidth);
+            }
+
             if (Panel.GetZIndex(this) == 0)
             {
                 Panel.SetZIndex(this, 1);
@@ -57,7 +67,7 @@ namespace InventoryAndProjectManagement
             Point relativePoint = TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
             if (CurrentTranslateX == 0)
             {
-                CurrentTranslateX = Application.Current.MainWindow.ActualWidth / 2 - relativePoint.X - ActualWidth / 2;
+                CurrentTranslateX = WindowWidth / 2 - relativePoint.X - ActualWidth / 2;
             }
             else
             {
@@ -66,7 +76,7 @@ namespace InventoryAndProjectManagement
 
             if (CurrentTranslateY == 0)
             {
-                CurrentTranslateY = Application.Current.MainWindow.ActualHeight / 2 - relativePoint.Y - ActualHeight / 2;
+                CurrentTranslateY = WindowHeight / 2 - relativePoint.Y - ActualHeight / 2;
             }
             else
             {

@@ -48,7 +48,7 @@
             MouseLeave="Card_MouseLeave"
             MouseLeftButtonDown="Card_MouseLeftButtonDown">
         <materialDesign:Flipper.Triggers>
-            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseEnter">
+            <EventTrigger RoutedEvent="materialDesign:Flipper.MouseEnter">
                 <BeginStoryboard>
                     <Storyboard>
                         <DoubleAnimation Storyboard.TargetProperty="ScaleX" Storyboard.TargetName="ScaleTransform"
@@ -58,7 +58,7 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseLeave">
+            <EventTrigger RoutedEvent="materialDesign:Flipper.MouseLeave">
                 <BeginStoryboard>
                     <Storyboard>
                         <DoubleAnimation Storyboard.TargetProperty="ScaleX" Storyboard.TargetName="ScaleTransform"
@@ -68,7 +68,7 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-            <EventTrigger RoutedEvent="materialDesign:Plane3D.MouseLeftButtonDown">
+            <EventTrigger RoutedEvent="materialDesign:Flipper.MouseLeftButtonDown">
                 <BeginStoryboard>
                     <Storyboard>
                         <DoubleAnimation
@@ -257,7 +257,11 @@
             </Grid>
         </materialDesign:Flipper.FrontContent>
         <materialDesign:Flipper.BackContent>
-            <TextBlock>Back will go here</TextBlock>
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Viewbox>
+                    <TextBlock>Back will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go hereBack will go here</TextBlock>
+                </Viewbox>
+            </Grid>
         </materialDesign:Flipper.BackContent>
     </materialDesign:Flipper>
 </UserControl>

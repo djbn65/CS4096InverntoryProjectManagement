@@ -67,7 +67,7 @@ namespace InventoryAndProjectManagement
             Point relativePoint = TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
             if (CurrentTranslateX == 0)
             {
-                CurrentTranslateX = WindowWidth / 2 - relativePoint.X - ActualWidth / 2;
+                CurrentTranslateX = WindowWidth / 2 - relativePoint.X - ActualWidth / 2 - Margin.Right;
             }
             else
             {
@@ -76,7 +76,7 @@ namespace InventoryAndProjectManagement
 
             if (CurrentTranslateY == 0)
             {
-                CurrentTranslateY = WindowHeight / 2 - relativePoint.Y - ActualHeight / 2;
+                CurrentTranslateY = WindowHeight / 2 - relativePoint.Y - ActualHeight / 2 - Margin.Top;
             }
             else
             {

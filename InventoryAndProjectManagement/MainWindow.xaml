@@ -14,7 +14,69 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="Font/#OpenSans-Regular">
-    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
-        <WrapPanel x:Name="MainItems" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-    </ScrollViewer>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0, 10, 0, 0" Name="Header">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition MaxHeight="100" />
+            </Grid.RowDefinitions>
+
+            <StackPanel x:Name="CompanyInfo" Margin="30, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                <Image Source="Images/test.jpg" Height="{Binding ActualHeight, ElementName=Tabs}" />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0">Grover Machine Company</TextBlock>
+            </StackPanel>
+            <StackPanel
+                    x:Name="Tabs"
+                    Orientation="Horizontal"
+                    Margin="4"
+                    HorizontalAlignment="Center"
+                    Grid.Column="1">
+                <RadioButton
+                        Style="{StaticResource MaterialDesignTabRadioButton}"
+                        Margin="4"
+                        IsChecked="True"
+                        Content="Machines"
+                        Checked="RadioButton_Checked" />
+                <RadioButton
+                        Style="{StaticResource MaterialDesignTabRadioButton}"
+                        Margin="4"
+                        IsChecked="False"
+                        Content="Inventory"
+                        Checked="RadioButton_Checked" />
+            </StackPanel>
+            <Border
+                BorderBrush="Black"
+                BorderThickness="2"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                CornerRadius="5"
+                Grid.Column="2"
+                Margin="0, 0, 30, 0">
+                <Grid Margin="5" Width="{Binding ActualWidth, ElementName=CompanyInfo}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <materialDesign:PackIcon Kind="Search" />
+                    <TextBox Grid.Column="1" Text="Search" Margin="3 0 0 0" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+        </ScrollViewer>
+        <TextBlock x:Name="Inventory" Grid.Row="1" Visibility="Collapsed">Inventory</TextBlock>
+    </Grid>
 </Window>

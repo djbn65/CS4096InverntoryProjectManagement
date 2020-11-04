@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace InventoryAndProjectManagement
 {
@@ -13,7 +14,7 @@ namespace InventoryAndProjectManagement
 
             for (int i = 0; i < 100; i++)
             {
-                MainItems.Children.Add(
+                ((WrapPanel)Machines.Content).Children.Add(
                     new MachineListItem
                     {
                         Width = 275,
@@ -22,6 +23,15 @@ namespace InventoryAndProjectManagement
                         ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
                     }
                 );
+            }
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Machines != null)
+            {
+                Machines.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
+                Inventory.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
             }
         }
     }

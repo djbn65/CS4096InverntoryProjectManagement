@@ -17,7 +17,6 @@ namespace InventoryAndProjectManagement
                 ((WrapPanel)Machines.Content).Children.Add(
                     new MachineListItem
                     {
-                        Width = 275,
                         Margin = new Thickness(20),
                         Title = "Machine " + i.ToString(),
                         ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
@@ -33,6 +32,10 @@ namespace InventoryAndProjectManagement
                 Machines.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
                 Inventory.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
             }
+        }
+
+        private void Machines_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
         }
     }
 }

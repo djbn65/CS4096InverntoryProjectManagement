@@ -20,7 +20,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Margin="0, 10, 0, 0" Name="Header">
+        <Grid Margin="0, 10, 0, 10" Name="Header">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -74,7 +74,7 @@
             </Border>
         </Grid>
 
-        <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
+        <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Machines_ScrollChanged">
             <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
         </ScrollViewer>
         <TextBlock x:Name="Inventory" Grid.Row="1" Visibility="Collapsed">Inventory</TextBlock>

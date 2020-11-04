@@ -49,14 +49,15 @@ namespace InventoryAndProjectManagement
         {
             double WindowWidth = Application.Current.MainWindow.ActualWidth;
             double WindowHeight = Application.Current.MainWindow.ActualHeight;
+            Point parentRelativePoint = ((FrameworkElement)((FrameworkElement)Parent).Parent).TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
 
             if (WindowWidth > WindowHeight)
             {
-                CurrentScaleX = CurrentScaleY = CurrentScaleX > 1.02 ? 1 : (.9 * WindowHeight / ActualHeight);
+                CurrentScaleX = CurrentScaleY = Card.IsFlipped ? 1 : (.9 * (WindowHeight - parentRelativePoint.Y - Margin.Top) / ActualHeight);
             }
             else
             {
-                CurrentScaleX = CurrentScaleY = CurrentScaleX > 1.02 ? 1 : (.9 * WindowWidth / ActualWidth);
+                CurrentScaleX = CurrentScaleY = Card.IsFlipped ? 1 : (.9 * WindowWidth / ActualWidth);
             }
 
             if (Panel.GetZIndex(this) == 0)
@@ -65,6 +66,7 @@ namespace InventoryAndProjectManagement
             }
 
             Point relativePoint = TransformToAncestor(Application.Current.MainWindow).Transform(new Point(0, 0));
+
             if (CurrentTranslateX == 0)
             {
                 CurrentTranslateX = WindowWidth / 2 - relativePoint.X - ActualWidth / 2 - Margin.Right;
@@ -76,7 +78,7 @@ namespace InventoryAndProjectManagement
 
             if (CurrentTranslateY == 0)
             {
-                CurrentTranslateY = WindowHeight / 2 - relativePoint.Y - ActualHeight / 2 - Margin.Top;
+                CurrentTranslateY = (WindowHeight + parentRelativePoint.Y) / 2 - (relativePoint.Y + ActualHeight / 2) - Margin.Top;
             }
             else
             {

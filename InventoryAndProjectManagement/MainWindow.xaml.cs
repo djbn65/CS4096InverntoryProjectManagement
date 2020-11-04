@@ -12,13 +12,22 @@ namespace InventoryAndProjectManagement
         {
             InitializeComponent();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 20; i++)
             {
                 ((WrapPanel)Machines.Content).Children.Add(
                     new MachineListItem
                     {
                         Margin = new Thickness(20),
                         Title = "Machine " + i.ToString(),
+                        ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
+                    }
+                );
+
+                ((WrapPanel)Inventory.Content).Children.Add(
+                    new MachineListItem
+                    {
+                        Margin = new Thickness(20),
+                        Title = "Item " + i.ToString(),
                         ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
                     }
                 );
@@ -35,6 +44,10 @@ namespace InventoryAndProjectManagement
         }
 
         private void Machines_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+        }
+
+        private void Inventory_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
         }
     }

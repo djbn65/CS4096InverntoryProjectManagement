@@ -77,6 +77,8 @@
         <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Machines_ScrollChanged">
             <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
         </ScrollViewer>
-        <TextBlock x:Name="Inventory" Grid.Row="1" Visibility="Collapsed">Inventory</TextBlock>
+        <ScrollViewer x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Inventory_ScrollChanged">
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+        </ScrollViewer>
     </Grid>
 </Window>

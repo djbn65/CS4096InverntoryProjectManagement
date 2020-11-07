@@ -8,14 +8,19 @@ namespace InventoryAndProjectManagement
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string abbreviation = "";
-
-            foreach (string word in ((string)value).Split(' '))
+            if (value != null)
             {
-                abbreviation += char.ToUpper(word[0]);
+                string abbreviation = "";
+
+                foreach (string word in ((string)value).Split(' '))
+                {
+                    abbreviation += char.ToUpper(word[0]);
+                }
+
+                return abbreviation;
             }
 
-            return abbreviation;
+            return "";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

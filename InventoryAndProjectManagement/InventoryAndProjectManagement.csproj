@@ -43,6 +43,7 @@
     <Reference Include="MaterialDesignThemes.Wpf, Version=3.2.0.1979, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.3.2.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -64,6 +65,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
+    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />
     <Page Include="MachineListItem.xaml">
       <SubType>Designer</SubType>

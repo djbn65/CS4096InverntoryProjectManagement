@@ -14,6 +14,10 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="Font/#OpenSans-Regular">
+    <Window.DataContext>
+        <local:MainWindowViewModel x:Name="Data" />
+    </Window.DataContext>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -74,11 +78,22 @@
             </Border>
         </Grid>
 
-        <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Machines_ScrollChanged">
-            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+        <ScrollViewer Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Machines_ScrollChanged">
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
         </ScrollViewer>
-        <ScrollViewer x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Inventory_ScrollChanged">
-            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+        <ScrollViewer Panel.ZIndex="0" x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Inventory_ScrollChanged">
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
         </ScrollViewer>
+        <ItemsControl x:Name="CanvasItems" Grid.Row="1" ItemsSource="{Binding Path=CanvasItems}" Panel.ZIndex="-1">
+            <ItemsControl.Background>
+                <SolidColorBrush Color="Black" Opacity="0" />
+            </ItemsControl.Background>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
     </Grid>
 </Window>

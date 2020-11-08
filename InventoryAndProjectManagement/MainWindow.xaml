@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:virtual="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:local="clr-namespace:InventoryAndProjectManagement"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
@@ -24,6 +23,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Margin="0, 10, 0, 10" Name="Header">
@@ -75,38 +75,43 @@
                     </Grid.ColumnDefinitions>
 
                     <materialDesign:PackIcon Kind="Search" />
-                    <TextBox Grid.Column="1" Text="Search" Margin="3 0 0 0" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" />
+                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Search" Margin="3 0 0 0" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" />
                 </Grid>
             </Border>
         </Grid>
 
-        <virtual:VirtualizingItemsControl ItemsSource="{Binding Machines}" Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
-            <virtual:VirtualizingItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" />
-                </DataTemplate>
-            </virtual:VirtualizingItemsControl.ItemTemplate>
+        <ScrollViewer Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" Visibility="{Binding MachineVisibility}">
+            <ItemsControl ItemsSource="{Binding Machines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" Margin="20" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
 
-            <virtual:VirtualizingItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <virtual:VirtualizingWrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-                </ItemsPanelTemplate>
-            </virtual:VirtualizingItemsControl.ItemsPanel>
-        </virtual:VirtualizingItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
 
-        <virtual:VirtualizingItemsControl ItemsSource="{Binding Parts}" Panel.ZIndex="0" x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
-            <virtual:VirtualizingItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:MachineListItem Description="{Binding Descr}" Title="{Binding Number}" />
-                </DataTemplate>
-            </virtual:VirtualizingItemsControl.ItemTemplate>
+        <ScrollViewer Panel.ZIndex="0" x:Name="Inventory" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding PartsVisibility}" Margin="0, 0, 0, 0">
+            <ItemsControl ItemsSource="{Binding PartsToShow}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Margin="20" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
 
-            <virtual:VirtualizingItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <virtual:VirtualizingWrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-                </ItemsPanelTemplate>
-            </virtual:VirtualizingItemsControl.ItemsPanel>
-        </virtual:VirtualizingItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
         <ItemsControl x:Name="CanvasItems" Grid.Row="1" ItemsSource="{Binding Path=CanvasItems}" Panel.ZIndex="-1">
             <ItemsControl.Background>
                 <SolidColorBrush Color="Black" Opacity="0" />
@@ -118,5 +123,13 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 15">
+            <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleLeft}" Click="Beginning_Click" />
+            <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronLeft}" Click="Back_Click" />
+            <TextBox materialDesign:HintAssist.HelperText="" x:Name="PageValue" VerticalAlignment="Center" Grid.Column="1" Text="{Binding PageNum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="30" Margin="10, 0" TextAlignment="Center" PreviewTextInput="PageValue_PreviewTextInput" />
+            <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronRight}" Click="Next_Click" />
+            <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleRight}" Click="End_Click" />
+        </StackPanel>
     </Grid>
 </Window>

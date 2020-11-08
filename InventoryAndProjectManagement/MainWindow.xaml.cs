@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -25,17 +28,9 @@ namespace InventoryAndProjectManagement
         {
             if (Machines != null)
             {
-                Machines.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
-                Inventory.Visibility = (Machines.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed);
+                Data.MachineVisibility = (Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden);
+                Data.PartsVisibility = (Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden);
             }
-        }
-
-        private void Machines_ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-        }
-
-        private void Inventory_ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
         }
 
         private void WrapPanel_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -167,7 +162,7 @@ namespace InventoryAndProjectManagement
         private void ReturnAnimationCompleted(object sender, EventArgs e)
         {
             Panel.SetZIndex(CanvasItems, -1);
-            Data.CanvasItems.RemoveAt(0);
+            if (Data.CanvasItems.Count > 0) Data.CanvasItems.RemoveAt(0);
             CardToPutBack.Visibility = Visibility.Visible;
         }
 
@@ -279,6 +274,35 @@ namespace InventoryAndProjectManagement
                     }
                 }
             }
+
+            Data.PageNum = 1;
+        }
+
+        private static readonly Regex _regex = new Regex("[0-9]*"); //regex that matches disallowed text
+
+        private void PageValue_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !_regex.IsMatch(e.Text);
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            --Data.PageNum;
+        }
+
+        private void Beginning_Click(object sender, RoutedEventArgs e)
+        {
+            Data.PageNum = 1;
+        }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+            ++Data.PageNum;
+        }
+
+        private void End_Click(object sender, RoutedEventArgs e)
+        {
+            Data.PageNum = Data.Parts.Count() / Data.ItemsPerPage;
         }
     }
 }

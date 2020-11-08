@@ -75,7 +75,7 @@
                     </Grid.ColumnDefinitions>
 
                     <materialDesign:PackIcon Kind="Search" />
-                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Search" Margin="3 0 0 0" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" />
+                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Search" Margin="3 0 0 0" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" KeyDown="SearchBox_KeyDown" />
                 </Grid>
             </Border>
         </Grid>

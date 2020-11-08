@@ -77,7 +77,7 @@
                     <materialDesign:ColorZone Mode="PrimaryMid" Panel.ZIndex="0">
                         <Viewbox>
                             <TextBlock
-                        Text="{Binding Title, Converter={StaticResource MachTitleToAbbrConverter}}"
+                        Text="{Binding Title, ElementName=MachineItem, Converter={StaticResource MachTitleToAbbrConverter}}"
                         Foreground="{StaticResource MaterialDesignDarkForeground}" />
                         </Viewbox>
                     </materialDesign:ColorZone>
@@ -85,14 +85,14 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Stretch="UniformToFill"
-                        Source="{Binding ImgPath, TargetNullValue={x:Null}}"
-                        Visibility="{Binding ImgPath, Converter={StaticResource ImgPathVisibilityConverter}}"
+                        Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
+                        Visibility="{Binding ImgPath, ElementName=MachineItem, Converter={StaticResource ImgPathVisibilityConverter}}"
                         Panel.ZIndex="1" />
                     <StackPanel
                     Grid.Row="1"
                     Margin="10, 20, 10, 10">
                         <TextBlock
-                        Text="{Binding Title}"
+                        Text="{Binding Title, ElementName=MachineItem}"
                         FontSize="25"
                         HorizontalAlignment="Center" />
                         <Grid
@@ -230,7 +230,7 @@
                     </Grid.RenderTransform>
 
                     <Viewbox MaxHeight="65" Margin="0, 0, 0, 10" x:Name="BackTitle">
-                        <TextBlock HorizontalAlignment="Center" Text="{Binding Title}" />
+                        <TextBlock HorizontalAlignment="Center" Text="{Binding Title, ElementName=MachineItem}" />
                     </Viewbox>
                     <Grid Grid.Row="1" Margin="0, 0, 0, 20">
                         <Grid.ColumnDefinitions>
@@ -246,7 +246,7 @@
                             <!-- Meant to hold the machine picture I believe -->
                             <materialDesign:Card Margin="0, 0, 0, 10" materialDesign:ShadowAssist.ShadowDepth="Depth1">
                                 <Image
-                                    Source="{Binding ImgPath, TargetNullValue={x:Null}}"
+                                    Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Stretch="Uniform" />
@@ -257,9 +257,7 @@
                                     <Viewbox Margin="5" MaxHeight="40">
                                         <TextBlock TextAlignment="Center">Description</TextBlock>
                                     </Viewbox>
-                                    <Viewbox>
-                                        <TextBlock TextAlignment="Center" TextWrapping="Wrap" FontSize="6">Description about the machine will go in this area</TextBlock>
-                                    </Viewbox>
+                                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Description, ElementName=MachineItem}" />
                                 </StackPanel>
                             </materialDesign:Card>
                         </Grid>

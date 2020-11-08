@@ -14,7 +14,8 @@ namespace InventoryAndProjectManagement
 
                 foreach (string word in ((string)value).Split(' '))
                 {
-                    abbreviation += char.ToUpper(word[0]);
+                    if (word.Length > 0)
+                        abbreviation += char.ToUpper(word[0]);
                 }
 
                 return abbreviation;

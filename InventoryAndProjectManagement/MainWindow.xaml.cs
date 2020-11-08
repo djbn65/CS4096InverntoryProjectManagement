@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -17,31 +19,6 @@ namespace InventoryAndProjectManagement
         public MainWindow()
         {
             InitializeComponent();
-
-            // TODO: We need to probably change this to a company production server when we give it to them
-            //SqlConnection conn = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=master;User Id=admin;Password=groverpassword;");
-            //conn.OpenAsync();
-
-            for (int i = 0; i < 20; i++)
-            {
-                ((WrapPanel)Machines.Content).Children.Add(
-                    new MachineListItem
-                    {
-                        Margin = new Thickness(20),
-                        Title = "Machine " + i.ToString(),
-                        ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
-                    }
-                );
-
-                ((WrapPanel)Inventory.Content).Children.Add(
-                    new MachineListItem
-                    {
-                        Margin = new Thickness(20),
-                        Title = "Item " + i.ToString(),
-                        ImgPath = i % 2 == 0 ? "Images/test.jpg" : null
-                    }
-                );
-            }
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -74,6 +51,7 @@ namespace InventoryAndProjectManagement
                 MachineListItem itemCopy = new MachineListItem
                 {
                     Title = item.Title,
+                    Description = item.Description,
                     ImgPath = item.ImgPath
                 };
 
@@ -270,6 +248,37 @@ namespace InventoryAndProjectManagement
             test.Children.Add(backVisibilityAnimation);
 
             test.Begin();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // TODO: We need to probably change this to a company production server when we give it to them
+            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            {
+                SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
+                SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
+                partsCommand.Connection.Open();
+
+                using (SqlDataReader reader = partsCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var description = reader["part_description"];
+
+                        Data.Parts.Add(new Part((string)reader["part_name"], (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
+                    }
+                }
+
+                using (SqlDataReader reader = machinesCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var description = reader["machine_description"];
+
+                        Data.Machines.Add(new Machine((string)reader["machine_name"], (description is DBNull) ? "" : (string)description));
+                    }
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:virtual="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:local="clr-namespace:InventoryAndProjectManagement"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
@@ -13,7 +14,8 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="Font/#OpenSans-Regular">
+        FontFamily="Font/#OpenSans-Regular"
+        Loaded="Window_Loaded">
     <Window.DataContext>
         <local:MainWindowViewModel x:Name="Data" />
     </Window.DataContext>
@@ -78,12 +80,33 @@
             </Border>
         </Grid>
 
-        <ScrollViewer Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Machines_ScrollChanged">
-            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-        </ScrollViewer>
-        <ScrollViewer Panel.ZIndex="0" x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" ScrollChanged="Inventory_ScrollChanged">
-            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-        </ScrollViewer>
+        <virtual:VirtualizingItemsControl ItemsSource="{Binding Machines}" Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
+            <virtual:VirtualizingItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" />
+                </DataTemplate>
+            </virtual:VirtualizingItemsControl.ItemTemplate>
+
+            <virtual:VirtualizingItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <virtual:VirtualizingWrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                </ItemsPanelTemplate>
+            </virtual:VirtualizingItemsControl.ItemsPanel>
+        </virtual:VirtualizingItemsControl>
+
+        <virtual:VirtualizingItemsControl ItemsSource="{Binding Parts}" Panel.ZIndex="0" x:Name="Inventory" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0">
+            <virtual:VirtualizingItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:MachineListItem Description="{Binding Descr}" Title="{Binding Number}" />
+                </DataTemplate>
+            </virtual:VirtualizingItemsControl.ItemTemplate>
+
+            <virtual:VirtualizingItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <virtual:VirtualizingWrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                </ItemsPanelTemplate>
+            </virtual:VirtualizingItemsControl.ItemsPanel>
+        </virtual:VirtualizingItemsControl>
         <ItemsControl x:Name="CanvasItems" Grid.Row="1" ItemsSource="{Binding Path=CanvasItems}" Panel.ZIndex="-1">
             <ItemsControl.Background>
                 <SolidColorBrush Color="Black" Opacity="0" />

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
@@ -11,8 +13,15 @@ namespace InventoryAndProjectManagement
     /// </summary>
     public partial class MachineListItem : UserControl, INotifyPropertyChanged
     {
-        private string _title = null;
-        public string Title { get => _title; set { _title = value; NotifyPropertyChanged(); } }
+        public string Title { get => (string)GetValue(TitleProperty); set { SetValue(TitleProperty, value); NotifyPropertyChanged(); } }
+
+        public static readonly DependencyProperty TitleProperty =
+            DependencyProperty.Register("Title", typeof(string), typeof(MachineListItem), new PropertyMetadata(" "));
+
+        public string Description { get => (string)GetValue(DescriptionProperty); set { SetValue(DescriptionProperty, value); NotifyPropertyChanged(); } }
+
+        public static readonly DependencyProperty DescriptionProperty =
+            DependencyProperty.Register("Description", typeof(string), typeof(MachineListItem), new PropertyMetadata(" "));
 
         private string _path = null;
         public string ImgPath { get => _path; set { _path = value; NotifyPropertyChanged(); } }
@@ -22,7 +31,6 @@ namespace InventoryAndProjectManagement
         public MachineListItem()
         {
             InitializeComponent();
-            DataContext = this;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

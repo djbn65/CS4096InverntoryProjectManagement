@@ -55,6 +55,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="VirtualizingWrapPanel, Version=1.5.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\VirtualizingWrapPanel.1.5.2\lib\net45\VirtualizingWrapPanel.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -65,7 +68,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
+    <Compile Include="Machine.cs" />
     <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="Part.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />
     <Page Include="MachineListItem.xaml">
       <SubType>Designer</SubType>

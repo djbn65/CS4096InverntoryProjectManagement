@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -259,8 +260,9 @@ namespace InventoryAndProjectManagement
                     while (reader.Read())
                     {
                         var description = reader["part_description"];
+                        string partName = (string)reader["part_name"];
 
-                        Data.Parts.Add(new Part((string)reader["part_name"], (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
+                        Data.Parts.Add(new Part(partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
                     }
                 }
 
@@ -303,6 +305,14 @@ namespace InventoryAndProjectManagement
         private void End_Click(object sender, RoutedEventArgs e)
         {
             Data.PageNum = Data.Parts.Count() / Data.ItemsPerPage;
+        }
+
+        private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                Data.PageNum = 1;
+            }
         }
     }
 }

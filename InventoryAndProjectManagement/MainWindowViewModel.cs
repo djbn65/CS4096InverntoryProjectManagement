@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -16,6 +17,19 @@ namespace InventoryAndProjectManagement
         private int _visiblePageNum;
         private Visibility _partsVis = Visibility.Hidden;
         private Visibility _machVis = Visibility.Visible;
+        private string _searchText;
+        private List<string> _searchWords;
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                _searchWords = new List<string>(SearchText.Split(' '));
+                OnPropertyChanged("SearchText");
+            }
+        }
 
         public Visibility PartsVisibility
         {
@@ -64,14 +78,29 @@ namespace InventoryAndProjectManagement
                     _pageNumParts = 0;
                     _visibleParts = new ObservableCollection<Part>();
 
+                    ObservableCollection<Part> filteredList;
+
+                    if (_searchWords != null)
+                    {
+                        filteredList = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower()))));
+                    }
+                    else
+                    {
+                        filteredList = Parts;
+                    }
+
                     for (int i = (PageNum - 1) * ItemsPerPage; i < PageNum * ItemsPerPage; ++i)
                     {
-                        if (i >= Parts.Count()) break;
+                        if (i >= filteredList.Count()) break;
 
-                        _visibleParts.Add(Parts[i]);
+                        _visibleParts.Add(filteredList[i]);
                     }
 
                     OnPropertyChanged("PartsToShow");
+                }
+                else if (PartsVisibility == Visibility.Visible)
+                {
+                    _visibleParts = null;
                 }
 
                 OnPropertyChanged("PageNum");

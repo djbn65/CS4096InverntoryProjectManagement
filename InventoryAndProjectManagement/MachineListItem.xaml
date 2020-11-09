@@ -70,15 +70,15 @@
             <Grid>
                 <Grid x:Name="FrontContent">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="175" />
+                        <RowDefinition Height="160" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <materialDesign:ColorZone Mode="PrimaryMid" Panel.ZIndex="0">
+                    <materialDesign:ColorZone Mode="PrimaryMid" Panel.ZIndex="0" VerticalAlignment="Stretch">
                         <Viewbox>
                             <TextBlock
-                        Text="{Binding Title, ElementName=MachineItem, Converter={StaticResource MachTitleToAbbrConverter}}"
-                        Foreground="{StaticResource MaterialDesignDarkForeground}" />
+                                Text="{Binding Title, ElementName=MachineItem, Converter={StaticResource MachTitleToAbbrConverter}}"
+                                Foreground="{StaticResource MaterialDesignDarkForeground}" />
                         </Viewbox>
                     </materialDesign:ColorZone>
                     <Image
@@ -89,12 +89,19 @@
                         Visibility="{Binding ImgPath, ElementName=MachineItem, Converter={StaticResource ImgPathVisibilityConverter}}"
                         Panel.ZIndex="1" />
                     <StackPanel
-                    Grid.Row="1"
-                    Margin="10, 20, 10, 10">
+                        Grid.Row="1"
+                        Margin="10, 20, 10, 10">
                         <TextBlock
-                        Text="{Binding Title, ElementName=MachineItem}"
-                        FontSize="25"
-                        HorizontalAlignment="Center" />
+                            Text="{Binding Description, ElementName=MachineItem}"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Text="{Binding Title, ElementName=MachineItem}"
+                            FontSize="18"
+                            HorizontalAlignment="Center"
+                            Foreground="Gray"
+                            Margin="0, 5, 0, 0" />
                         <Grid
                         Margin="0, 7, 0, 0">
                             <Grid.ColumnDefinitions>

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +24,14 @@ namespace InventoryAndProjectManagement
 
         public static readonly DependencyProperty DescriptionProperty =
             DependencyProperty.Register("Description", typeof(string), typeof(MachineListItem), new PropertyMetadata(" "));
+
+        public ObservableCollection<Part> Parts
+        {
+            get { return (ObservableCollection<Part>)GetValue(PartsProperty); }
+            set { SetValue(PartsProperty, value); NotifyPropertyChanged(); }
+        }
+
+        public static readonly DependencyProperty PartsProperty = DependencyProperty.Register("Parts", typeof(ObservableCollection<Part>), typeof(MachineListItem), new PropertyMetadata(new ObservableCollection<Part>()));
 
         private string _path = null;
         public string ImgPath { get => _path; set { _path = value; NotifyPropertyChanged(); } }

@@ -38,7 +38,7 @@
             </Grid.RowDefinitions>
 
             <StackPanel x:Name="CompanyInfo" Margin="30, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Image Source="Images/test.jpg" Height="{Binding ActualHeight, ElementName=Tabs}" />
+                <Image Source="Images/logo.png" Height="{Binding ActualHeight, ElementName=CompanyInfo}" />
                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0">Grover Machine Company</TextBlock>
             </StackPanel>
             <StackPanel
@@ -52,13 +52,15 @@
                         Margin="4"
                         IsChecked="True"
                         Content="Machines"
-                        Checked="RadioButton_Checked" />
+                        Checked="RadioButton_Checked"
+                        Cursor="Hand" />
                 <RadioButton
                         Style="{StaticResource MaterialDesignTabRadioButton}"
                         Margin="4"
                         IsChecked="False"
                         Content="Inventory"
-                        Checked="RadioButton_Checked" />
+                        Checked="RadioButton_Checked"
+                        Cursor="Hand" />
             </StackPanel>
             <Border
                 BorderBrush="Black"
@@ -81,10 +83,10 @@
         </Grid>
 
         <ScrollViewer Panel.ZIndex="0" x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" Visibility="{Binding MachineVisibility}">
-            <ItemsControl ItemsSource="{Binding Machines}">
+            <ItemsControl ItemsSource="{Binding MachinesToShow}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" Margin="20" />
+                        <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" Parts="{Binding PartList}" Margin="20" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
 

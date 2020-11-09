@@ -48,7 +48,8 @@ namespace InventoryAndProjectManagement
                 {
                     Title = item.Title,
                     Description = item.Description,
-                    ImgPath = item.ImgPath
+                    ImgPath = item.ImgPath,
+                    Parts = item.Parts
                 };
 
                 Point position;
@@ -262,7 +263,7 @@ namespace InventoryAndProjectManagement
                         var description = reader["part_description"];
                         string partName = (string)reader["part_name"];
 
-                        Data.Parts.Add(new Part(partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
+                        Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
                     }
                 }
 
@@ -272,7 +273,23 @@ namespace InventoryAndProjectManagement
                     {
                         var description = reader["machine_description"];
 
-                        Data.Machines.Add(new Machine((string)reader["machine_name"], (description is DBNull) ? "" : (string)description));
+                        Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "" : (string)description, new List<Part>()));
+                    }
+                }
+
+                foreach (Machine machine in Data.Machines)
+                {
+                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
+
+                    Console.WriteLine(partIdsCommand.CommandText);
+
+                    using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
+                    {
+                        while (partIdsReader.Read())
+                        {
+                            machine.PartList.Add(Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]));
+                            machine.PartList.Last().Quantity = (int)(double)partIdsReader["part_amount"];
+                        }
                     }
                 }
             }
@@ -304,7 +321,10 @@ namespace InventoryAndProjectManagement
 
         private void End_Click(object sender, RoutedEventArgs e)
         {
-            Data.PageNum = Data.Parts.Count() / Data.ItemsPerPage;
+            if (Data.PartsVisibility == Visibility.Visible)
+            {
+                Data.PageNum = (int)Math.Ceiling((double)Data.Parts.Count() / Data.ItemsPerPage);
+            }
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

@@ -7,6 +7,7 @@
              xmlns:local="clr-namespace:InventoryAndProjectManagement"
              mc:Ignorable="d"
              Width="275"
+             Height="294"
              Name="MachineItem"
              RenderTransformOrigin="0.5, 0.5"
              TextOptions.TextFormattingMode="Ideal"
@@ -269,9 +270,21 @@
                             </materialDesign:Card>
                         </Grid>
                         <materialDesign:Card Grid.Column="1">
-                            <TextBlock TextWrapping="Wrap" TextAlignment="Center" Padding="10" VerticalAlignment="Center">
-                                List of parts/machines will go here
-                            </TextBlock>
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <local:CardBackListItem Qty="{Binding Quantity}" PartName="{Binding Descr}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
                         </materialDesign:Card>
                     </Grid>
                     <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">

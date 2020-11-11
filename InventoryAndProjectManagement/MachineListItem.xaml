@@ -65,7 +65,7 @@
     <UserControl.RenderTransform>
         <TransformGroup>
             <ScaleTransform x:Name="Scaler" />
-            <TranslateTransform x:Name="Mover" />
+            <TranslateTransform />
         </TransformGroup>
     </UserControl.RenderTransform>
 
@@ -86,13 +86,6 @@
                                 Foreground="{StaticResource MaterialDesignDarkForeground}" />
                         </Viewbox>
                     </materialDesign:ColorZone>
-                    <!--<Image
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Stretch="UniformToFill"
-                        Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
-                        Visibility="{Binding ImgPath, ElementName=MachineItem, Converter={StaticResource ImgPathVisibilityConverter}}"
-                        Panel.ZIndex="1" />-->
                     <StackPanel
                         Grid.Row="1"
                         Margin="10, 20, 10, 10">
@@ -251,71 +244,82 @@
                             </Viewbox>
                         </StackPanel>
                         <materialDesign:Card Grid.Row="1" Margin="0, 20, 0, 20">
-                            <ScrollViewer>
+                            <ListView ItemsSource="{Binding Parts, ElementName=MachineItem}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderThickness="0, 0, 0, 1" Margin="15, 0">
+                                            <Border.BorderBrush>
+                                                <SolidColorBrush Color="Gray" Opacity="0.75" />
+                                            </Border.BorderBrush>
+
+                                            <Grid Margin="15, 10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding Descr}" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Amount Needed: " />
+                                                        <TextBlock Text="{Binding Quantity}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
+                                                    <Button Content="{materialDesign:PackIcon Kind=Pencil}" Style="{StaticResource MaterialDesignFlatAccentBgButton}" materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
+                                                    <Button Content="{materialDesign:PackIcon Kind=Trash}" Style="{StaticResource MaterialDesignFlatMidBgButton}" materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+
+                            <!--<ScrollViewer>
                                 <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <local:CardBackListItem Qty="{Binding Quantity}" PartName="{Binding Descr}" />
+                                            <Border BorderThickness="0, 0, 0, 1" Margin="15, 0">
+                                                <Border.BorderBrush>
+                                                    <SolidColorBrush Color="Gray" Opacity="0.75" />
+                                                </Border.BorderBrush>
+
+                                                <Grid Margin="15, 10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding Descr}" />
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="Amount Needed: " />
+                                                            <TextBlock Text="{Binding Quantity}" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                    <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
+                                                        <Button Content="{materialDesign:PackIcon Kind=Pencil}" Style="{StaticResource MaterialDesignFlatAccentBgButton}" materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
+                                                        <Button Content="{materialDesign:PackIcon Kind=Trash}" Style="{StaticResource MaterialDesignFlatMidBgButton}" materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
 
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel />
+                                            <ListBox />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>
-                            </ScrollViewer>
+                            </ScrollViewer>-->
                         </materialDesign:Card>
-                        <!--<Grid Grid.Row="1" Margin="0, 20, 0, 20">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*" />
-                                <ColumnDefinition Width="2*" />
-                            </Grid.ColumnDefinitions>
-
-                            <Grid Margin="0, 0, 15, 0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                -->
-                        <!-- Meant to hold the machine picture I believe -->
-                        <!--
-                                <materialDesign:Card Margin="0, 0, 0, 10" materialDesign:ShadowAssist.ShadowDepth="Depth1">
-                                    <Image
-                                    Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Stretch="Uniform" />
-                                </materialDesign:Card>
-
-                                <materialDesign:Card Grid.Row="1" Padding="10">
-                                    <StackPanel>
-                                        <Viewbox Margin="5" MaxHeight="40">
-                                            <TextBlock TextAlignment="Center">Description</TextBlock>
-                                        </Viewbox>
-                                        <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Description, ElementName=MachineItem}" />
-                                    </StackPanel>
-                                </materialDesign:Card>
-                            </Grid>
-                            <materialDesign:Card Grid.Column="1">
-                                <ScrollViewer>
-                                    <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <local:CardBackListItem Qty="{Binding Quantity}" PartName="{Binding Descr}" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </materialDesign:Card>
-                        </Grid>-->
                         <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">
                             <Viewbox>
                                 <TextBlock>Action</TextBlock>

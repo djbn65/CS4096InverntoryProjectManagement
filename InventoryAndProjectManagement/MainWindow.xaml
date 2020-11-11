@@ -141,7 +141,7 @@
         </ScrollViewer>
 
         <ScrollViewer x:Name="Inventory" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding PartsVisibility}" Margin="0, 0, 0, 0">
-            <ItemsControl ItemsSource="{Binding PartsToShow}">
+            <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Margin="20" />

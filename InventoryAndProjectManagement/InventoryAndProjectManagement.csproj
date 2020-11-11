@@ -67,18 +67,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CardBackListItem.xaml.cs">
-      <DependentUpon>CardBackListItem.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />
-    <Page Include="CardBackListItem.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="MachineListItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

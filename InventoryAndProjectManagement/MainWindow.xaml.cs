@@ -17,6 +17,7 @@ namespace InventoryAndProjectManagement
     {
         private static MachineListItem currentlyPoppedUpCard = null;
         private static ContentPresenter currentPoppedUpCardCp = null;
+        private static bool cardFlipping = false;
 
         public MainWindow()
         {
@@ -27,6 +28,12 @@ namespace InventoryAndProjectManagement
         {
             if (Machines != null)
             {
+                if (currentlyPoppedUpCard != null)
+                {
+                    cardFlipping = true;
+                    Back(currentlyPoppedUpCard);
+                }
+
                 Data.MachineVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
                 Data.PartsVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
             }
@@ -36,12 +43,21 @@ namespace InventoryAndProjectManagement
         {
             if (e.Source is MachineListItem item)
             {
-                if (currentlyPoppedUpCard == null)
+                if (currentlyPoppedUpCard == null && !cardFlipping)
                 {
-                    currentPoppedUpCardCp = MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+                    if (Data.MachineVisibility == Visibility.Visible) currentPoppedUpCardCp = MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+                    else currentPoppedUpCardCp = InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+
+                    currentlyPoppedUpCard = item;
+                    cardFlipping = true;
                     PopUpCard(item);
                 }
-                else Back(item);
+                else if ((Data.MachineVisibility == Visibility.Visible && currentPoppedUpCardCp == MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter && !cardFlipping) ||
+                          currentPoppedUpCardCp == InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter)
+                {
+                    cardFlipping = true;
+                    Back(item);
+                }
             }
         }
 
@@ -112,16 +128,16 @@ namespace InventoryAndProjectManagement
             card.GridHeight = card.ActualHeight;
             card.GridWidth = card.ActualWidth;
 
-            test.Completed += flipBackCompleted;
+            test.Completed += FlipBackCompleted;
             test.Begin();
-
-            currentlyPoppedUpCard = null;
         }
 
-        private void flipBackCompleted(object sender, EventArgs e)
+        private void FlipBackCompleted(object sender, EventArgs e)
         {
-            Panel.SetZIndex(currentPoppedUpCardCp, 0);
+            if (currentPoppedUpCardCp != null) Panel.SetZIndex(currentPoppedUpCardCp, 0);
             currentPoppedUpCardCp = null;
+            currentlyPoppedUpCard = null;
+            cardFlipping = false;
         }
 
         private void PopUpCard(MachineListItem card)
@@ -198,57 +214,64 @@ namespace InventoryAndProjectManagement
             card.GridHeight = .95 * Inventory.ActualHeight;
             card.GridWidth = .95 * Inventory.ActualHeight;
 
+            test.Completed += FlipUpCompleted;
             test.Begin();
+        }
 
-            currentlyPoppedUpCard = card;
+        private void FlipUpCompleted(object sender, EventArgs e)
+        {
+            cardFlipping = false;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // TODO: We need to probably change this to a company production server when we give it to them
-            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            new Thread(() =>
             {
-                SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
-                SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
-                partsCommand.Connection.Open();
-
-                using (SqlDataReader reader = partsCommand.ExecuteReader())
+                // TODO: We need to probably change this to a company production server when we give it to them
+                using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
                 {
-                    while (reader.Read())
+                    SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
+                    SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
+                    partsCommand.Connection.Open();
+
+                    using (SqlDataReader reader = partsCommand.ExecuteReader())
                     {
-                        var description = reader["part_description"];
-                        string partName = (string)reader["part_name"];
-
-                        Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
-                    }
-                }
-
-                using (SqlDataReader reader = machinesCommand.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var description = reader["machine_description"];
-
-                        Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "" : (string)description, new List<Part>()));
-                    }
-                }
-
-                foreach (Machine machine in Data.Machines)
-                {
-                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
-
-                    using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
-                    {
-                        while (partIdsReader.Read())
+                        while (reader.Read())
                         {
-                            machine.PartList.Add(Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]));
-                            machine.PartList.Last().Quantity = (int)(double)partIdsReader["part_amount"];
+                            var description = reader["part_description"];
+                            string partName = (string)reader["part_name"];
+
+                            Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
+                        }
+                    }
+
+                    using (SqlDataReader reader = machinesCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var description = reader["machine_description"];
+
+                            Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "" : (string)description, new List<Part>()));
+                        }
+                    }
+
+                    foreach (Machine machine in Data.Machines)
+                    {
+                        SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
+
+                        using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
+                        {
+                            while (partIdsReader.Read())
+                            {
+                                machine.PartList.Add(Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]));
+                                machine.PartList.Last().Quantity = (int)(double)partIdsReader["part_amount"];
+                            }
                         }
                     }
                 }
-            }
 
-            Data.PageNum = 1;
+                Data.PageNum = 1;
+            }).Start();
         }
 
         private static readonly Regex _regex = new Regex("[0-9]*"); //regex that matches disallowed text

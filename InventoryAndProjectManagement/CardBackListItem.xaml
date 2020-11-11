@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
              Name="CardBackItem">
     <Border BorderThickness="0, 0, 0, 1" Margin="15, 0">
@@ -10,22 +11,22 @@
             <SolidColorBrush Color="Gray" Opacity="0.75" />
         </Border.BorderBrush>
 
-        <Grid Margin="25, 10">
+        <Grid Margin="15, 10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <StackPanel>
-                <TextBlock FontWeight="Medium" FontSize="20" Text="{Binding PartName, ElementName=CardBackItem}" />
+                <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding PartName, ElementName=CardBackItem}" />
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Amount Needed: " />
                     <TextBlock Text="{Binding ElementName=CardBackItem, Path=Qty}" />
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button>Bt1</Button>
-                <Button Margin="5, 0, 0, 0">Bt2</Button>
+            <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
+                <Button Content="{materialDesign:PackIcon Kind=Pencil}" Style="{StaticResource MaterialDesignFlatAccentBgButton}" materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
+                <Button Content="{materialDesign:PackIcon Kind=Trash}" Style="{StaticResource MaterialDesignFlatMidBgButton}" materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0" />
             </StackPanel>
         </Grid>
     </Border>

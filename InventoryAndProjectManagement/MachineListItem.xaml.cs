@@ -3,10 +3,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace InventoryAndProjectManagement
 {
@@ -32,6 +34,30 @@ namespace InventoryAndProjectManagement
         }
 
         public static readonly DependencyProperty PartsProperty = DependencyProperty.Register("Parts", typeof(ObservableCollection<Part>), typeof(MachineListItem), new PropertyMetadata(new ObservableCollection<Part>()));
+
+        private double _gridHeight;
+
+        public double GridHeight
+        {
+            get => _gridHeight;
+            set
+            {
+                _gridHeight = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private double _gridWidth;
+
+        public double GridWidth
+        {
+            get => _gridWidth;
+            set
+            {
+                _gridWidth = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         private string _path = null;
         public string ImgPath { get => _path; set { _path = value; NotifyPropertyChanged(); } }
@@ -64,6 +90,11 @@ namespace InventoryAndProjectManagement
             {
                 (FindResource("HoverExit") as Storyboard).Begin();
             }
+        }
+
+        private void MachineItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("HERE");
         }
     }
 }

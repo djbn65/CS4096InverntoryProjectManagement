@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using System.Threading;
 
 namespace InventoryAndProjectManagement
 {
@@ -16,9 +15,8 @@ namespace InventoryAndProjectManagement
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static double CardHeight = 0;
-        private static double CardWidth = 0;
-        private static MachineListItem CardToPutBack;
+        private static MachineListItem currentlyPoppedUpCard = null;
+        private static ContentPresenter currentPoppedUpCardCp = null;
 
         public MainWindow()
         {
@@ -29,8 +27,8 @@ namespace InventoryAndProjectManagement
         {
             if (Machines != null)
             {
-                Data.MachineVisibility = (Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden);
-                Data.PartsVisibility = (Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden);
+                Data.MachineVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
+                Data.PartsVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
             }
         }
 
@@ -38,151 +36,105 @@ namespace InventoryAndProjectManagement
         {
             if (e.Source is MachineListItem item)
             {
-                if (CardHeight == 0)
+                if (currentlyPoppedUpCard == null)
                 {
-                    CardHeight = item.ActualHeight;
-                    CardWidth = item.ActualWidth;
+                    currentPoppedUpCardCp = MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+                    PopUpCard(item);
                 }
-
-                MachineListItem itemCopy = new MachineListItem
-                {
-                    Title = item.Title,
-                    Description = item.Description,
-                    ImgPath = item.ImgPath,
-                    Parts = item.Parts
-                };
-
-                Point position;
-
-                if (Machines.IsAncestorOf(item))
-                {
-                    position = item.TransformToAncestor(Machines).Transform(new Point(0, 0));
-                }
-                else
-                {
-                    position = item.TransformToAncestor(Inventory).Transform(new Point(0, 0));
-                }
-
-                Canvas.SetTop(itemCopy, position.Y);
-                Canvas.SetLeft(itemCopy, position.X);
-
-                itemCopy.MouseLeftButtonDown += Back;
-
-                Data.CanvasItems.Add(itemCopy);
-
-                PopUpCard(ref itemCopy, ref item);
-
-                CardToPutBack = item;
+                else Back(item);
             }
         }
 
-        private void Back(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Back(MachineListItem card)
         {
-            if (sender is MachineListItem card)
-            {
-                Point position;
+            DoubleAnimation translateYAnimation = new DoubleAnimation(0, TimeSpan.FromMilliseconds(300)),
+                            tranlsateXAnimation = new DoubleAnimation(0, TimeSpan.FromMilliseconds(300));
 
-                if (Machines.IsAncestorOf(CardToPutBack))
+            card.IsFlipped = false;
+
+            DoubleAnimationUsingKeyFrames flipAnimationX = new DoubleAnimationUsingKeyFrames();
+            flipAnimationX.KeyFrames.Add(
+                new LinearDoubleKeyFrame
                 {
-                    position = CardToPutBack.TransformToAncestor(Machines).Transform(new Point(0, 0));
+                    KeyTime = TimeSpan.FromMilliseconds(150),
+                    Value = 0
                 }
-                else
+            );
+            flipAnimationX.KeyFrames.Add(
+                new LinearDoubleKeyFrame
                 {
-                    position = CardToPutBack.TransformToAncestor(Inventory).Transform(new Point(0, 0));
+                    KeyTime = TimeSpan.FromMilliseconds(300),
+                    Value = 1
                 }
+            );
 
-                DoubleAnimation widthAnim = new DoubleAnimation(card.ActualWidth, CardWidth, TimeSpan.FromMilliseconds(300)),
-                                heightAnim = new DoubleAnimation(card.ActualHeight, CardHeight, TimeSpan.FromMilliseconds(300)),
-                                topAnim = new DoubleAnimation(Canvas.GetTop(card), position.Y, TimeSpan.FromMilliseconds(300)),
-                                leftAnim = new DoubleAnimation(Canvas.GetLeft(card), position.X, TimeSpan.FromMilliseconds(300));
+            DoubleAnimation scaleAnimationY = new DoubleAnimation(1, TimeSpan.FromMilliseconds(300));
 
-                card.IsFlipped = true;
+            ObjectAnimationUsingKeyFrames frontVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
+            frontVisibilityAnimation.KeyFrames.Add(
+                new DiscreteObjectKeyFrame
+                {
+                    KeyTime = TimeSpan.FromMilliseconds(150),
+                    Value = Visibility.Visible
+                }
+            );
+            ObjectAnimationUsingKeyFrames backVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
+            backVisibilityAnimation.KeyFrames.Add(
+                new DiscreteObjectKeyFrame
+                {
+                    KeyTime = TimeSpan.FromMilliseconds(150),
+                    Value = Visibility.Hidden
+                }
+            );
 
-                DoubleAnimationUsingKeyFrames flipAnimationX = new DoubleAnimationUsingKeyFrames();
-                flipAnimationX.KeyFrames.Add(
-                    new LinearDoubleKeyFrame
-                    {
-                        KeyTime = TimeSpan.FromMilliseconds(150),
-                        Value = 0
-                    }
-                );
-                flipAnimationX.KeyFrames.Add(
-                    new LinearDoubleKeyFrame
-                    {
-                        KeyTime = TimeSpan.FromMilliseconds(300),
-                        Value = 1
-                    }
-                );
+            Storyboard.SetTarget(translateYAnimation, card);
+            Storyboard.SetTargetProperty(translateYAnimation, new PropertyPath("RenderTransform.Children[1].Y"));
+            Storyboard.SetTarget(tranlsateXAnimation, card);
+            Storyboard.SetTargetProperty(tranlsateXAnimation, new PropertyPath("RenderTransform.Children[1].X"));
+            Storyboard.SetTarget(flipAnimationX, card);
+            Storyboard.SetTargetProperty(flipAnimationX, new PropertyPath("RenderTransform.Children[0].ScaleX"));
+            Storyboard.SetTarget(scaleAnimationY, card);
+            Storyboard.SetTargetProperty(scaleAnimationY, new PropertyPath("RenderTransform.Children[0].ScaleY"));
+            Storyboard.SetTarget(frontVisibilityAnimation, card.FrontContent);
+            Storyboard.SetTargetProperty(frontVisibilityAnimation, new PropertyPath("Visibility"));
+            Storyboard.SetTarget(backVisibilityAnimation, card.BackContent);
+            Storyboard.SetTargetProperty(backVisibilityAnimation, new PropertyPath("Visibility"));
 
-                ObjectAnimationUsingKeyFrames frontVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
-                frontVisibilityAnimation.KeyFrames.Add(
-                    new DiscreteObjectKeyFrame
-                    {
-                        KeyTime = TimeSpan.FromMilliseconds(150),
-                        Value = Visibility.Visible
-                    }
-                );
-                ObjectAnimationUsingKeyFrames backVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
-                backVisibilityAnimation.KeyFrames.Add(
-                    new DiscreteObjectKeyFrame
-                    {
-                        KeyTime = TimeSpan.FromMilliseconds(150),
-                        Value = Visibility.Collapsed
-                    }
-                );
+            Storyboard test = new Storyboard();
 
-                Storyboard.SetTarget(widthAnim, card);
-                Storyboard.SetTargetProperty(widthAnim, new PropertyPath("Width"));
-                Storyboard.SetTarget(heightAnim, card);
-                Storyboard.SetTargetProperty(heightAnim, new PropertyPath("Height"));
-                Storyboard.SetTarget(topAnim, card);
-                Storyboard.SetTargetProperty(topAnim, new PropertyPath("(Canvas.Top)"));
-                Storyboard.SetTarget(leftAnim, card);
-                Storyboard.SetTargetProperty(leftAnim, new PropertyPath("(Canvas.Left)"));
-                Storyboard.SetTarget(flipAnimationX, card);
-                Storyboard.SetTargetProperty(flipAnimationX, new PropertyPath("RenderTransform.ScaleX"));
-                Storyboard.SetTarget(frontVisibilityAnimation, card.FrontContent);
-                Storyboard.SetTargetProperty(frontVisibilityAnimation, new PropertyPath("Visibility"));
-                Storyboard.SetTarget(backVisibilityAnimation, card.BackContent);
-                Storyboard.SetTargetProperty(backVisibilityAnimation, new PropertyPath("Visibility"));
+            test.Children.Add(translateYAnimation);
+            test.Children.Add(tranlsateXAnimation);
+            test.Children.Add(flipAnimationX);
+            test.Children.Add(scaleAnimationY);
+            test.Children.Add(frontVisibilityAnimation);
+            test.Children.Add(backVisibilityAnimation);
 
-                Storyboard test = new Storyboard();
+            card.GridHeight = card.ActualHeight;
+            card.GridWidth = card.ActualWidth;
 
-                test.Children.Add(widthAnim);
-                test.Children.Add(heightAnim);
-                test.Children.Add(topAnim);
-                test.Children.Add(leftAnim);
-                test.Children.Add(flipAnimationX);
-                test.Children.Add(frontVisibilityAnimation);
-                test.Children.Add(backVisibilityAnimation);
+            test.Completed += flipBackCompleted;
+            test.Begin();
 
-                test.Completed += ReturnAnimationCompleted;
-                test.Begin();
-            }
+            currentlyPoppedUpCard = null;
         }
 
-        private void ReturnAnimationCompleted(object sender, EventArgs e)
+        private void flipBackCompleted(object sender, EventArgs e)
         {
-            Panel.SetZIndex(CanvasItems, -1);
-            if (Data.CanvasItems.Count > 0) Data.CanvasItems.RemoveAt(0);
-            CardToPutBack.Visibility = Visibility.Visible;
+            Panel.SetZIndex(currentPoppedUpCardCp, 0);
+            currentPoppedUpCardCp = null;
         }
 
-        private void PopUpCard(ref MachineListItem card, ref MachineListItem original)
+        private void PopUpCard(MachineListItem card)
         {
-            if (CardHeight == 0)
-            {
-                CardHeight = original.ActualHeight;
-                CardWidth = original.ActualWidth;
-            }
+            Panel.SetZIndex(currentPoppedUpCardCp, 1);
 
-            original.Visibility = Visibility.Hidden;
-            Panel.SetZIndex(CanvasItems, 1);
+            Point cardPosition;
 
-            DoubleAnimation widthAnim = new DoubleAnimation(CardWidth, Math.Min(1200, .9 * CanvasItems.ActualWidth), TimeSpan.FromMilliseconds(300)),
-                            heightAnim = new DoubleAnimation(CardHeight, Math.Min(800, .9 * CanvasItems.ActualHeight), TimeSpan.FromMilliseconds(300)),
-                            topAnim = new DoubleAnimation(Canvas.GetTop(card), (CanvasItems.ActualHeight - (double)heightAnim.To) / 2, TimeSpan.FromMilliseconds(300)),
-                            leftAnim = new DoubleAnimation(Canvas.GetLeft(card), (CanvasItems.ActualWidth - (double)widthAnim.To) / 2, TimeSpan.FromMilliseconds(300));
+            if (Data.MachineVisibility == Visibility.Visible) cardPosition = card.TransformToAncestor(Machines).Transform(new Point(0, 0));
+            else cardPosition = card.TransformToAncestor(Inventory).Transform(new Point(0, 0));
+
+            DoubleAnimation translateYAnimation = new DoubleAnimation(0, Inventory.ActualHeight / 2 - cardPosition.Y - card.ActualHeight / 2, TimeSpan.FromMilliseconds(300)),
+                            tranlsateXAnimation = new DoubleAnimation(0, Inventory.ActualWidth / 2 - cardPosition.X - card.ActualWidth / 2, TimeSpan.FromMilliseconds(300));
 
             card.IsFlipped = true;
 
@@ -198,16 +150,18 @@ namespace InventoryAndProjectManagement
                 new LinearDoubleKeyFrame
                 {
                     KeyTime = TimeSpan.FromMilliseconds(300),
-                    Value = -1
+                    Value = -(.95 * Inventory.ActualHeight) / card.ActualHeight
                 }
             );
+
+            DoubleAnimation scaleAnimationY = new DoubleAnimation(.95 * Inventory.ActualHeight / card.ActualHeight, TimeSpan.FromMilliseconds(300));
 
             ObjectAnimationUsingKeyFrames frontVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
             frontVisibilityAnimation.KeyFrames.Add(
                 new DiscreteObjectKeyFrame
                 {
                     KeyTime = TimeSpan.FromMilliseconds(150),
-                    Value = Visibility.Hidden
+                    Value = Visibility.Collapsed
                 }
             );
             ObjectAnimationUsingKeyFrames backVisibilityAnimation = new ObjectAnimationUsingKeyFrames();
@@ -219,16 +173,14 @@ namespace InventoryAndProjectManagement
                 }
             );
 
-            Storyboard.SetTarget(widthAnim, card);
-            Storyboard.SetTargetProperty(widthAnim, new PropertyPath("Width"));
-            Storyboard.SetTarget(heightAnim, card);
-            Storyboard.SetTargetProperty(heightAnim, new PropertyPath("Height"));
-            Storyboard.SetTarget(topAnim, card);
-            Storyboard.SetTargetProperty(topAnim, new PropertyPath("(Canvas.Top)"));
-            Storyboard.SetTarget(leftAnim, card);
-            Storyboard.SetTargetProperty(leftAnim, new PropertyPath("(Canvas.Left)"));
+            Storyboard.SetTarget(translateYAnimation, card);
+            Storyboard.SetTargetProperty(translateYAnimation, new PropertyPath("RenderTransform.Children[1].Y"));
+            Storyboard.SetTarget(tranlsateXAnimation, card);
+            Storyboard.SetTargetProperty(tranlsateXAnimation, new PropertyPath("RenderTransform.Children[1].X"));
             Storyboard.SetTarget(flipAnimationX, card);
-            Storyboard.SetTargetProperty(flipAnimationX, new PropertyPath("RenderTransform.ScaleX"));
+            Storyboard.SetTargetProperty(flipAnimationX, new PropertyPath("RenderTransform.Children[0].ScaleX"));
+            Storyboard.SetTarget(scaleAnimationY, card);
+            Storyboard.SetTargetProperty(scaleAnimationY, new PropertyPath("RenderTransform.Children[0].ScaleY"));
             Storyboard.SetTarget(frontVisibilityAnimation, card.FrontContent);
             Storyboard.SetTargetProperty(frontVisibilityAnimation, new PropertyPath("Visibility"));
             Storyboard.SetTarget(backVisibilityAnimation, card.BackContent);
@@ -236,15 +188,19 @@ namespace InventoryAndProjectManagement
 
             Storyboard test = new Storyboard();
 
-            test.Children.Add(widthAnim);
-            test.Children.Add(heightAnim);
-            test.Children.Add(topAnim);
-            test.Children.Add(leftAnim);
+            test.Children.Add(translateYAnimation);
+            test.Children.Add(tranlsateXAnimation);
             test.Children.Add(flipAnimationX);
+            test.Children.Add(scaleAnimationY);
             test.Children.Add(frontVisibilityAnimation);
             test.Children.Add(backVisibilityAnimation);
 
+            card.GridHeight = .95 * Inventory.ActualHeight;
+            card.GridWidth = .95 * Inventory.ActualHeight;
+
             test.Begin();
+
+            currentlyPoppedUpCard = card;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -280,8 +236,6 @@ namespace InventoryAndProjectManagement
                 foreach (Machine machine in Data.Machines)
                 {
                     SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
-
-                    Console.WriteLine(partIdsCommand.CommandText);
 
                     using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
                     {
@@ -323,7 +277,7 @@ namespace InventoryAndProjectManagement
         {
             if (Data.PartsVisibility == Visibility.Visible)
             {
-                Data.PageNum = (int)Math.Ceiling((double)Data.Parts.Count() / Data.ItemsPerPage);
+                Data.PageNum = (int)Math.Ceiling((double)Data.FilteredItemsCount / Data.ItemsPerPage);
             }
         }
 

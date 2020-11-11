@@ -9,7 +9,6 @@ namespace InventoryAndProjectManagement
 {
     internal class MainWindowViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<MachineListItem> _canvasItems;
         private ObservableCollection<Part> _parts;
         private ObservableCollection<Machine> _localMachines;
         private ObservableCollection<Machine> _visibleMachines;
@@ -19,15 +18,21 @@ namespace InventoryAndProjectManagement
         private int _visiblePageNum;
         private Visibility _partsVis = Visibility.Hidden;
         private Visibility _machVis = Visibility.Visible;
-        private string _searchText;
+        private string _inventorySearchText = "";
+        private string _machinesSearchText = "";
         private List<string> _searchWords;
+        private bool _requery = false;
 
         public string SearchText
         {
-            get => _searchText;
+            get => PartsVisibility == Visibility.Visible ? _inventorySearchText : _machinesSearchText;
             set
             {
-                _searchText = value;
+                _requery = (value != SearchText);
+
+                if (PartsVisibility == Visibility.Visible) _inventorySearchText = value;
+                else _machinesSearchText = value;
+
                 _searchWords = new List<string>(SearchText.Split(' '));
                 OnPropertyChanged("SearchText");
             }
@@ -40,6 +45,8 @@ namespace InventoryAndProjectManagement
             set
             {
                 _partsVis = value;
+
+                SearchText = SearchText;
 
                 if (_partsVis == Visibility.Visible) { _pageNumMachines = PageNum; PageNum = _pageNumParts; }
                 else { _pageNumParts = PageNum; PageNum = _pageNumMachines; }
@@ -64,20 +71,21 @@ namespace InventoryAndProjectManagement
             get => PageNum > 1;
         }
 
-        public bool NextEnabled { get => _partsVis == Visibility.Visible ? PageNum * ItemsPerPage < Parts.Count() : PageNum * ItemsPerPage < Machines.Count(); }
+        public bool NextEnabled { get => PageNum * ItemsPerPage < FilteredItemsCount; }
 
         public int ItemsPerPage { get; set; } = 50;
+
+        public int FilteredItemsCount { get; private set; }
 
         public int PageNum
         {
             get => _visiblePageNum;
             set
             {
-                if (PartsVisibility == Visibility.Visible && value > (int)Math.Ceiling((double)Parts.Count / ItemsPerPage)) _visiblePageNum = (int)Math.Ceiling((double)Parts.Count / ItemsPerPage);
-                else if (MachineVisibility == Visibility.Visible && value > (int)Math.Ceiling((double)Machines.Count / ItemsPerPage)) _visiblePageNum = (int)Math.Ceiling((double)Machines.Count / ItemsPerPage);
+                if (value > (int)Math.Ceiling((double)FilteredItemsCount / ItemsPerPage)) _visiblePageNum = (int)Math.Ceiling((double)FilteredItemsCount / ItemsPerPage);
                 else _visiblePageNum = value;
 
-                if (PartsVisibility == Visibility.Visible && (_visiblePageNum != _pageNumParts || _visibleParts == null))
+                if (PartsVisibility == Visibility.Visible && (_visiblePageNum != _pageNumParts || _visibleParts == null || _requery))
                 {
                     _pageNumParts = 0;
                     _visibleParts = new ObservableCollection<Part>();
@@ -93,21 +101,25 @@ namespace InventoryAndProjectManagement
                         filteredList = Parts;
                     }
 
+                    FilteredItemsCount = filteredList.Count();
+
                     for (int i = (PageNum - 1) * ItemsPerPage; i < PageNum * ItemsPerPage; ++i)
                     {
-                        if (i >= filteredList.Count()) break;
+                        if (i >= filteredList.Count() || i < 0) break;
 
                         _visibleParts.Add(filteredList[i]);
                     }
+
+                    _requery = false;
 
                     OnPropertyChanged("PartsToShow");
                 }
                 else if (PartsVisibility == Visibility.Visible)
                 {
-                    _visibleParts = null;
+                    FilteredItemsCount = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower())))).Count;
                 }
 
-                if (MachineVisibility == Visibility.Visible && (_visiblePageNum != _pageNumMachines || _visibleMachines == null))
+                if (MachineVisibility == Visibility.Visible && (_visiblePageNum != _pageNumMachines || _visibleMachines == null || _requery))
                 {
                     _pageNumMachines = 0;
                     _visibleMachines = new ObservableCollection<Machine>();
@@ -123,32 +135,26 @@ namespace InventoryAndProjectManagement
                         filteredList = Machines;
                     }
 
+                    FilteredItemsCount = filteredList.Count();
+
                     for (int i = (PageNum - 1) * ItemsPerPage; i < PageNum * ItemsPerPage; ++i)
                     {
-                        if (i >= filteredList.Count()) break;
+                        if (i >= filteredList.Count() || i < 0) break;
                         _visibleMachines.Add(filteredList[i]);
                     }
+
+                    _requery = false;
 
                     OnPropertyChanged("MachinesToShow");
                 }
                 else if (MachineVisibility == Visibility.Visible)
                 {
-                    _visibleMachines = null;
+                    FilteredItemsCount = new ObservableCollection<Machine>(Machines.Where(machine => _searchWords.Any(searchPart => machine.Description.ToLower().Contains(searchPart.ToLower()) || machine.Name.ToLower().Contains(searchPart.ToLower())))).Count;
                 }
 
                 OnPropertyChanged("PageNum");
                 OnPropertyChanged("BackEnabled");
                 OnPropertyChanged("NextEnabled");
-            }
-        }
-
-        public ObservableCollection<MachineListItem> CanvasItems
-        {
-            get => _canvasItems;
-            set
-            {
-                _canvasItems = value;
-                OnPropertyChanged("CanvasItems");
             }
         }
 
@@ -195,10 +201,16 @@ namespace InventoryAndProjectManagement
 
         public MainWindowViewModel()
         {
-            CanvasItems = new ObservableCollection<MachineListItem>();
             Parts = new ObservableCollection<Part>();
             Machines = new ObservableCollection<Machine>();
             Parts.CollectionChanged += PartOrMachineListChanged;
+            Machines.CollectionChanged += Machines_CollectionChanged;
+            FilteredItemsCount = ItemsPerPage;
+        }
+
+        private void Machines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("PageNum");
         }
 
         private void PartOrMachineListChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

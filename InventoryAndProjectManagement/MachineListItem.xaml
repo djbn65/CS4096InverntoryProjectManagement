@@ -14,7 +14,8 @@
              TextOptions.TextRenderingMode="Auto"
              MouseEnter="MachineItem_MouseEnter"
              MouseLeave="MachineItem_MouseLeave"
-             Cursor="Hand">
+             Cursor="Hand"
+             Loaded="MachineItem_Loaded">
     <UserControl.Resources>
         <local:TitleToAbbrConverter x:Key="MachTitleToAbbrConverter" />
         <local:ImgPathToImgVisibilityConverter x:Key="ImgPathVisibilityConverter" />
@@ -62,7 +63,10 @@
     </UserControl.Resources>
 
     <UserControl.RenderTransform>
-        <ScaleTransform x:Name="Scaler" />
+        <TransformGroup>
+            <ScaleTransform x:Name="Scaler" />
+            <TranslateTransform x:Name="Mover" />
+        </TransformGroup>
     </UserControl.RenderTransform>
 
     <materialDesign:Card UniformCornerRadius="5" materialDesign:ShadowAssist.ShadowDepth="Depth2">
@@ -82,13 +86,13 @@
                                 Foreground="{StaticResource MaterialDesignDarkForeground}" />
                         </Viewbox>
                     </materialDesign:ColorZone>
-                    <Image
+                    <!--<Image
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Stretch="UniformToFill"
                         Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
                         Visibility="{Binding ImgPath, ElementName=MachineItem, Converter={StaticResource ImgPathVisibilityConverter}}"
-                        Panel.ZIndex="1" />
+                        Panel.ZIndex="1" />-->
                     <StackPanel
                         Grid.Row="1"
                         Margin="10, 20, 10, 10">
@@ -226,52 +230,29 @@
                         </Grid>
                     </StackPanel>
                 </Grid>
-                <Grid Margin="30" x:Name="BackContent" Visibility="Collapsed" RenderTransformOrigin="0.5, 0.5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <Viewbox Stretch="Uniform" Margin="10">
+                    <Grid x:Name="BackContent" Visibility="Hidden" RenderTransformOrigin="0.5, 0.5" Height="{Binding ElementName=MachineItem, Path=GridHeight}" Width="{Binding ElementName=MachineItem, Path=GridWidth}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <Grid.RenderTransform>
-                        <ScaleTransform ScaleX="-1" />
-                    </Grid.RenderTransform>
+                        <Grid.RenderTransform>
+                            <ScaleTransform ScaleX="-1" />
+                        </Grid.RenderTransform>
 
-                    <Viewbox MaxHeight="65" Margin="0, 0, 0, 10" x:Name="BackTitle">
-                        <TextBlock HorizontalAlignment="Center" Text="{Binding Title, ElementName=MachineItem}" />
-                    </Viewbox>
-                    <Grid Grid.Row="1" Margin="0, 0, 0, 20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="2*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid Margin="0, 0, 15, 0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <!-- Meant to hold the machine picture I believe -->
-                            <materialDesign:Card Margin="0, 0, 0, 10" materialDesign:ShadowAssist.ShadowDepth="Depth1">
-                                <Image
-                                    Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Stretch="Uniform" />
-                            </materialDesign:Card>
-
-                            <materialDesign:Card Grid.Row="1" Padding="10">
-                                <StackPanel>
-                                    <Viewbox Margin="5" MaxHeight="40">
-                                        <TextBlock TextAlignment="Center">Description</TextBlock>
-                                    </Viewbox>
-                                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Description, ElementName=MachineItem}" />
-                                </StackPanel>
-                            </materialDesign:Card>
-                        </Grid>
-                        <materialDesign:Card Grid.Column="1">
+                        <StackPanel>
+                            <Viewbox MaxHeight="65" Margin="10, 0">
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding Title, ElementName=MachineItem}" />
+                            </Viewbox>
+                            <Viewbox MaxHeight="30" Margin="30, 0">
+                                <TextBlock Foreground="Gray" HorizontalAlignment="Center" Text="{Binding Description, ElementName=MachineItem}" />
+                            </Viewbox>
+                        </StackPanel>
+                        <materialDesign:Card Grid.Row="1" Margin="0, 20, 0, 20">
                             <ScrollViewer>
-                                <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                                <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <local:CardBackListItem Qty="{Binding Quantity}" PartName="{Binding Descr}" />
@@ -286,13 +267,62 @@
                                 </ItemsControl>
                             </ScrollViewer>
                         </materialDesign:Card>
+                        <!--<Grid Grid.Row="1" Margin="0, 20, 0, 20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="2*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Margin="0, 0, 15, 0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                -->
+                        <!-- Meant to hold the machine picture I believe -->
+                        <!--
+                                <materialDesign:Card Margin="0, 0, 0, 10" materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                                    <Image
+                                    Source="{Binding ImgPath, ElementName=MachineItem, TargetNullValue={x:Null}}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Stretch="Uniform" />
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Row="1" Padding="10">
+                                    <StackPanel>
+                                        <Viewbox Margin="5" MaxHeight="40">
+                                            <TextBlock TextAlignment="Center">Description</TextBlock>
+                                        </Viewbox>
+                                        <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Description, ElementName=MachineItem}" />
+                                    </StackPanel>
+                                </materialDesign:Card>
+                            </Grid>
+                            <materialDesign:Card Grid.Column="1">
+                                <ScrollViewer>
+                                    <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <local:CardBackListItem Qty="{Binding Quantity}" PartName="{Binding Descr}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </materialDesign:Card>
+                        </Grid>-->
+                        <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">
+                            <Viewbox>
+                                <TextBlock>Action</TextBlock>
+                            </Viewbox>
+                        </Button>
                     </Grid>
-                    <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">
-                        <Viewbox>
-                            <TextBlock>Action</TextBlock>
-                        </Viewbox>
-                    </Button>
-                </Grid>
+                </Viewbox>
             </Grid>
         </Grid>
     </materialDesign:Card>

@@ -311,5 +311,15 @@ namespace InventoryAndProjectManagement
                 Data.PageNum = 1;
             }
         }
+
+        private void DialogHost_DialogClosing(object sender, MaterialDesignThemes.Wpf.DialogClosingEventArgs eventArgs)
+        {
+            if ((bool)eventArgs.Parameter)
+            {
+                Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == Data.MachineIdToDelete));
+
+                // TODO: Actually delete the item from the database as well
+            }
+        }
     }
 }

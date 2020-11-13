@@ -1,9 +1,11 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight.Command;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace InventoryAndProjectManagement
 {
@@ -22,6 +24,27 @@ namespace InventoryAndProjectManagement
         private string _machinesSearchText = "";
         private List<string> _searchWords;
         private bool _requery = false;
+        private bool _isDialogOpen = false;
+
+        public int MachineIdToDelete { get; set; } = 0;
+
+        public bool IsDialogOpen
+        {
+            get => _isDialogOpen;
+            set
+            {
+                _isDialogOpen = value;
+                OnPropertyChanged("IsDialogOpen");
+            }
+        }
+
+        public ICommand DeleteMachineCommand => new RelayCommand<int>(DeleteMachineDialogPopUp);
+
+        private void DeleteMachineDialogPopUp(int aId)
+        {
+            MachineIdToDelete = aId;
+            IsDialogOpen = true;
+        }
 
         public string SearchText
         {
@@ -82,6 +105,15 @@ namespace InventoryAndProjectManagement
             get => _visiblePageNum;
             set
             {
+                if (PartsVisibility == Visibility.Visible && _searchWords != null)
+                {
+                    FilteredItemsCount = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower())))).Count;
+                }
+                else if (_searchWords != null)
+                {
+                    FilteredItemsCount = new ObservableCollection<Machine>(Machines.Where(machine => _searchWords.Any(searchPart => machine.Description.ToLower().Contains(searchPart.ToLower()) || machine.Name.ToLower().Contains(searchPart.ToLower())))).Count;
+                }
+
                 if (value > (int)Math.Ceiling((double)FilteredItemsCount / ItemsPerPage)) _visiblePageNum = (int)Math.Ceiling((double)FilteredItemsCount / ItemsPerPage);
                 else _visiblePageNum = value;
 
@@ -114,10 +146,6 @@ namespace InventoryAndProjectManagement
 
                     OnPropertyChanged("PartsToShow");
                 }
-                else if (PartsVisibility == Visibility.Visible)
-                {
-                    FilteredItemsCount = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower())))).Count;
-                }
 
                 if (MachineVisibility == Visibility.Visible && (_visiblePageNum != _pageNumMachines || _visibleMachines == null || _requery))
                 {
@@ -146,10 +174,6 @@ namespace InventoryAndProjectManagement
                     _requery = false;
 
                     OnPropertyChanged("MachinesToShow");
-                }
-                else if (MachineVisibility == Visibility.Visible)
-                {
-                    FilteredItemsCount = new ObservableCollection<Machine>(Machines.Where(machine => _searchWords.Any(searchPart => machine.Description.ToLower().Contains(searchPart.ToLower()) || machine.Name.ToLower().Contains(searchPart.ToLower())))).Count;
                 }
 
                 OnPropertyChanged("PageNum");
@@ -210,7 +234,8 @@ namespace InventoryAndProjectManagement
 
         private void Machines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            OnPropertyChanged("PageNum");
+            _requery = true;
+            PageNum = PageNum;
         }
 
         private void PartOrMachineListChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

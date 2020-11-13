@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:InventoryAndProjectManagement"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -52,50 +53,89 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <materialDesign:DialogHost
+        IsOpen="{Binding IsDialogOpen}"
+        DialogClosing="DialogHost_DialogClosing"
+        DialogTheme="Inherit">
+        <materialDesign:DialogHost.DialogContent>
+            <StackPanel Margin="16">
+                <TextBlock Text="Are you sure you want to delete" />
+                <TextBox
+                    Margin="0 8 0 0"
+                    HorizontalAlignment="Stretch"
+                    x:Name="FruitTextBox" />
+                <StackPanel
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+                    <Button
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        IsDefault="True"
+                        Margin="0 8 8 0"
+                        Content="DELETE"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                        <Button.CommandParameter>
+                            <system:Boolean>True</system:Boolean>
+                        </Button.CommandParameter>
+                    </Button>
 
-        <Grid Margin="0, 10, 0, 10" Name="Header">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+                    <Button
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            IsCancel="True"
+                            Margin="0 8 8 0"
+                            Content="CANCEL"
+                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                        <Button.CommandParameter>
+                            <system:Boolean>False</system:Boolean>
+                        </Button.CommandParameter>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </materialDesign:DialogHost.DialogContent>
 
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition MaxHeight="100" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel x:Name="CompanyInfo" Margin="30, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Image Source="Images/logo.png" Height="{Binding ActualHeight, ElementName=CompanyInfo}" />
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0">Grover Machine Company</TextBlock>
-            </StackPanel>
-            <StackPanel
+            <Grid Margin="0, 10, 0, 10" Name="Header">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition MaxHeight="100" />
+                </Grid.RowDefinitions>
+
+                <StackPanel x:Name="CompanyInfo" Margin="30, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Image Source="Images/logo.png" Height="{Binding ActualHeight, ElementName=CompanyInfo}" />
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0">Grover Machine Company</TextBlock>
+                </StackPanel>
+                <StackPanel
                     x:Name="Tabs"
                     Orientation="Horizontal"
                     Margin="4"
                     HorizontalAlignment="Center"
                     Grid.Column="1">
-                <RadioButton
+                    <RadioButton
                         Style="{StaticResource MaterialDesignTabRadioButton}"
                         Margin="4"
                         IsChecked="True"
                         Content="Machines"
                         Checked="RadioButton_Checked"
                         Cursor="Hand" />
-                <RadioButton
+                    <RadioButton
                         Style="{StaticResource MaterialDesignTabRadioButton}"
                         Margin="4"
                         IsChecked="False"
                         Content="Inventory"
                         Checked="RadioButton_Checked"
                         Cursor="Hand" />
-            </StackPanel>
-            <Border
+                </StackPanel>
+                <Border
                 BorderBrush="Black"
                 BorderThickness="2"
                 VerticalAlignment="Center"
@@ -103,65 +143,66 @@
                 CornerRadius="5"
                 Grid.Column="2"
                 Margin="0, 0, 30, 0">
-                <Grid Margin="5" Width="{Binding ActualWidth, ElementName=CompanyInfo}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <Grid Margin="5" Width="{Binding ActualWidth, ElementName=CompanyInfo}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <materialDesign:PackIcon Kind="Search" />
-                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Search" Margin="3 0 0 0" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" KeyDown="SearchBox_KeyDown" />
-                </Grid>
-            </Border>
+                        <materialDesign:PackIcon Kind="Search" />
+                        <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Search" Margin="3 0 0 0" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource MaterialDesignComboBoxEditableTextBox}" KeyDown="SearchBox_KeyDown" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Button
+                Grid.Row="1"
+                Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                Margin="0 0 30 0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Panel.ZIndex="2"
+                Content="{materialDesign:PackIcon Kind=Plus}" />
+
+            <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" Visibility="{Binding MachineVisibility}">
+                <ItemsControl x:Name="MachinesItemsControl" ItemsSource="{Binding MachinesToShow}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" Parts="{Binding PartList}" Id="{Binding Id}" DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}" Margin="20" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="Inventory" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding PartsVisibility}" Margin="0, 0, 0, 0">
+                <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Margin="20" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 15">
+                <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleLeft}" Click="Beginning_Click" />
+                <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronLeft}" Click="Back_Click" />
+                <TextBox materialDesign:HintAssist.HelperText="" x:Name="PageValue" VerticalAlignment="Center" Grid.Column="1" Text="{Binding PageNum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="30" Margin="10, 0" TextAlignment="Center" PreviewTextInput="PageValue_PreviewTextInput" />
+                <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronRight}" Click="Next_Click" />
+                <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleRight}" Click="End_Click" />
+            </StackPanel>
         </Grid>
-
-        <Button
-            Grid.Row="1"
-            Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-            Margin="0 0 30 0"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Panel.ZIndex="2"
-            Content="{materialDesign:PackIcon Kind=Plus}" />
-
-        <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" Visibility="{Binding MachineVisibility}">
-            <ItemsControl x:Name="MachinesItemsControl" ItemsSource="{Binding MachinesToShow}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" Parts="{Binding PartList}" Margin="20" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
-        </ScrollViewer>
-
-        <ScrollViewer x:Name="Inventory" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding PartsVisibility}" Margin="0, 0, 0, 0">
-            <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Margin="20" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
-        </ScrollViewer>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 15">
-            <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleLeft}" Click="Beginning_Click" />
-            <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronLeft}" Click="Back_Click" />
-            <TextBox materialDesign:HintAssist.HelperText="" x:Name="PageValue" VerticalAlignment="Center" Grid.Column="1" Text="{Binding PageNum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="30" Margin="10, 0" TextAlignment="Center" PreviewTextInput="PageValue_PreviewTextInput" />
-            <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronRight}" Click="Next_Click" />
-            <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleRight}" Click="End_Click" />
-        </StackPanel>
-    </Grid>
+    </materialDesign:DialogHost>
 </Window>

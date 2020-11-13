@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -31,6 +30,30 @@ namespace InventoryAndProjectManagement
         }
 
         public static readonly DependencyProperty PartsProperty = DependencyProperty.Register("Parts", typeof(ObservableCollection<Part>), typeof(MachineListItem), new PropertyMetadata(new ObservableCollection<Part>()));
+
+        public ICommand DeleteCommand
+        {
+            get => (ICommand)GetValue(DeleteCommandProperty);
+            set
+            {
+                SetValue(DeleteCommandProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty DeleteCommandProperty = DependencyProperty.Register("DeleteCommand", typeof(ICommand), typeof(MachineListItem));
+
+        public int Id
+        {
+            get => (int)GetValue(IdProperty);
+            set
+            {
+                SetValue(IdProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty IdProperty = DependencyProperty.Register("Id", typeof(int), typeof(MachineListItem));
 
         private double _gridHeight;
 
@@ -87,11 +110,6 @@ namespace InventoryAndProjectManagement
             {
                 (FindResource("HoverExit") as Storyboard).Begin();
             }
-        }
-
-        private void MachineItem_Loaded(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("HERE");
         }
     }
 }

@@ -14,8 +14,7 @@
              TextOptions.TextRenderingMode="Auto"
              MouseEnter="MachineItem_MouseEnter"
              MouseLeave="MachineItem_MouseLeave"
-             Cursor="Hand"
-             Loaded="MachineItem_Loaded">
+             Cursor="Hand">
     <UserControl.Resources>
         <local:TitleToAbbrConverter x:Key="MachTitleToAbbrConverter" />
         <local:ImgPathToImgVisibilityConverter x:Key="ImgPathVisibilityConverter" />
@@ -108,12 +107,14 @@
                             </Grid.ColumnDefinitions>
 
                             <Button
-                            Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
-                            Foreground="{StaticResource PrimaryHueMidBrush}"
-                            BorderBrush="Transparent"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                            ToolTip="Delete"
-                            Name="Delete">
+                                Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
+                                Foreground="{StaticResource PrimaryHueMidBrush}"
+                                BorderBrush="Transparent"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                ToolTip="Delete"
+                                Name="Delete"
+                                Command="{Binding ElementName=MachineItem, Path=DeleteCommand}"
+                                CommandParameter="{Binding ElementName=MachineItem, Path=Id}">
                                 <Button.Triggers>
                                     <EventTrigger RoutedEvent="Button.MouseEnter">
                                         <BeginStoryboard>
@@ -277,48 +278,11 @@
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Focusable" Value="False" />
+                                        <Setter Property="Cursor" Value="Arrow" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
                             </ListView>
-
-                            <!--<ScrollViewer>
-                                <ItemsControl ItemsSource="{Binding Parts, ElementName=MachineItem}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderThickness="0, 0, 0, 1" Margin="15, 0">
-                                                <Border.BorderBrush>
-                                                    <SolidColorBrush Color="Gray" Opacity="0.75" />
-                                                </Border.BorderBrush>
-
-                                                <Grid Margin="15, 10">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <StackPanel>
-                                                        <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding Descr}" />
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="Amount Needed: " />
-                                                            <TextBlock Text="{Binding Quantity}" />
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                    <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
-                                                        <Button Content="{materialDesign:PackIcon Kind=Pencil}" Style="{StaticResource MaterialDesignFlatAccentBgButton}" materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
-                                                        <Button Content="{materialDesign:PackIcon Kind=Trash}" Style="{StaticResource MaterialDesignFlatMidBgButton}" materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <ListBox />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </ScrollViewer>-->
                         </materialDesign:Card>
                         <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">
                             <Viewbox>

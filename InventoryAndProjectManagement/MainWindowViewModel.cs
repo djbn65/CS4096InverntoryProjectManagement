@@ -26,7 +26,7 @@ namespace InventoryAndProjectManagement
         private bool _requery = false;
         private bool _isDialogOpen = false;
 
-        public int MachineIdToDelete { get; set; } = 0;
+        public int MachineOrPartIdToDelete { get; set; } = 0;
 
         public bool IsDialogOpen
         {
@@ -42,7 +42,7 @@ namespace InventoryAndProjectManagement
 
         private void DeleteMachineDialogPopUp(int aId)
         {
-            MachineIdToDelete = aId;
+            MachineOrPartIdToDelete = aId;
             IsDialogOpen = true;
         }
 
@@ -228,19 +228,14 @@ namespace InventoryAndProjectManagement
             Parts = new ObservableCollection<Part>();
             Machines = new ObservableCollection<Machine>();
             Parts.CollectionChanged += PartOrMachineListChanged;
-            Machines.CollectionChanged += Machines_CollectionChanged;
+            Machines.CollectionChanged += PartOrMachineListChanged;
             FilteredItemsCount = ItemsPerPage;
-        }
-
-        private void Machines_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            _requery = true;
-            PageNum = PageNum;
         }
 
         private void PartOrMachineListChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            OnPropertyChanged("NextEnabled");
+            _requery = true;
+            PageNum = PageNum;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

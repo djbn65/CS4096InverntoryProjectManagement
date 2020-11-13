@@ -316,7 +316,8 @@ namespace InventoryAndProjectManagement
         {
             if ((bool)eventArgs.Parameter)
             {
-                Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == Data.MachineIdToDelete));
+                if (Data.MachineVisibility == Visibility.Visible) Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == Data.MachineOrPartIdToDelete));
+                else Data.Parts.Remove(Data.Parts.Single(part => part.Id == Data.MachineOrPartIdToDelete));
 
                 // TODO: Actually delete the item from the database as well
             }

@@ -184,7 +184,7 @@
                 <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Margin="20" />
+                            <local:MachineListItem Title="{Binding Number}" Description="{Binding Descr}" Id="{Binding Id}" DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}" Margin="20" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 

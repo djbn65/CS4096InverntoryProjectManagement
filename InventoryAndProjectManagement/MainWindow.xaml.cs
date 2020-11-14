@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Media.Animation;
 using GalaSoft.MvvmLight.Command;
 using MaterialDesignThemes.Wpf;
+using System.Threading;
 
 namespace InventoryAndProjectManagement
 {
@@ -261,7 +262,7 @@ namespace InventoryAndProjectManagement
             await Task.Run(() =>
             {
                 // TODO: We need to probably change this to a company production server when we give it to them
-                using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                 {
                     connection.Open();
 

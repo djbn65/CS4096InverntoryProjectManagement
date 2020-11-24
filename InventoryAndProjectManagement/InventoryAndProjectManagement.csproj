@@ -82,6 +82,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BackSideItemsConverter.cs" />
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MainWindowViewModel.cs" />

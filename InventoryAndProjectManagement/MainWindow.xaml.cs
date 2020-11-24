@@ -225,53 +225,50 @@ namespace InventoryAndProjectManagement
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            new Thread(() =>
+            // TODO: We need to probably change this to a company production server when we give it to them
+            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
             {
-                // TODO: We need to probably change this to a company production server when we give it to them
-                using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
+                SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
+                partsCommand.Connection.Open();
+
+                using (SqlDataReader reader = partsCommand.ExecuteReader())
                 {
-                    SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
-                    SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
-                    partsCommand.Connection.Open();
-
-                    using (SqlDataReader reader = partsCommand.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            var description = reader["part_description"];
-                            string partName = (string)reader["part_name"];
+                        var description = reader["part_description"];
+                        string partName = (string)reader["part_name"];
 
-                            Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "" : (string)description, (int)reader["part_qty"]));
-                        }
-                    }
-
-                    using (SqlDataReader reader = machinesCommand.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var description = reader["machine_description"];
-
-                            Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "" : (string)description, new List<Part>()));
-                        }
-                    }
-
-                    foreach (Machine machine in Data.Machines)
-                    {
-                        SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
-
-                        using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
-                        {
-                            while (partIdsReader.Read())
-                            {
-                                machine.PartList.Add(Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]));
-                                machine.PartList.Last().Quantity = (int)(double)partIdsReader["part_amount"];
-                            }
-                        }
+                        Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "No Description" : (string)description, (int)reader["part_qty"]));
                     }
                 }
 
-                Data.PageNum = 1;
-            }).Start();
+                using (SqlDataReader reader = machinesCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var description = reader["machine_description"];
+
+                        Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "No Description" : (string)description, new List<Part>()));
+                    }
+                }
+
+                foreach (Machine machine in Data.Machines)
+                {
+                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
+
+                    using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
+                    {
+                        while (partIdsReader.Read())
+                        {
+                            machine.PartList.Add(Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]));
+                            machine.PartList.Last().Quantity = (int)(double)partIdsReader["part_amount"];
+                        }
+                    }
+                }
+            }
+
+            Data.PageNum = 1;
         }
 
         private static readonly Regex _regex = new Regex("[0-9]*"); //regex that matches disallowed text
@@ -321,6 +318,29 @@ namespace InventoryAndProjectManagement
 
                 // TODO: Actually delete the item from the database as well
             }
+        }
+
+        private void CreateMachine_Click(object sender, RoutedEventArgs e)
+        {
+            List<Part> partsToAdd = new List<Part>();
+            foreach (Part part in Data.Parts.Where(part => part.IsSelected == true))
+            {
+                partsToAdd.Add(new Part(part.Id, part.Number, part.Description, part.QuantityNeeded));
+                part.IsSelected = false;
+                part.QuantityNeeded = 0;
+            }
+
+            Data.Machines.Add(new Machine(Data.Machines.Last().Id + 1, MachineName.Text, MachineDescription.Text, partsToAdd));
+            // TODO: Actually add item to the database
+
+            MachineDescription.Text = MachineName.Text = "";
+
+            PopUpArea.Visibility = Visibility.Hidden;
+        }
+
+        private void ActionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            PopUpArea.Visibility = Visibility.Visible;
         }
     }
 }

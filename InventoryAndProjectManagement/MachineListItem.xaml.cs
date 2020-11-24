@@ -13,23 +13,39 @@ namespace InventoryAndProjectManagement
     /// </summary>
     public partial class MachineListItem : UserControl, INotifyPropertyChanged
     {
-        public string Title { get => (string)GetValue(TitleProperty); set { SetValue(TitleProperty, value); NotifyPropertyChanged(); } }
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set
+            {
+                SetValue(TitleProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
 
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register("Title", typeof(string), typeof(MachineListItem), new PropertyMetadata(" "));
 
-        public string Description { get => (string)GetValue(DescriptionProperty); set { SetValue(DescriptionProperty, value); NotifyPropertyChanged(); } }
+        public string Description
+        {
+            get => (string)GetValue(DescriptionProperty);
+            set
+            {
+                SetValue(DescriptionProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
 
         public static readonly DependencyProperty DescriptionProperty =
             DependencyProperty.Register("Description", typeof(string), typeof(MachineListItem), new PropertyMetadata(" "));
 
-        public ObservableCollection<Part> Parts
+        public object BackSideItems
         {
-            get { return (ObservableCollection<Part>)GetValue(PartsProperty); }
-            set { SetValue(PartsProperty, value); NotifyPropertyChanged(); }
+            get { return GetValue(BackSideItemsProperty); }
+            set { SetValue(BackSideItemsProperty, value); NotifyPropertyChanged(); }
         }
 
-        public static readonly DependencyProperty PartsProperty = DependencyProperty.Register("Parts", typeof(ObservableCollection<Part>), typeof(MachineListItem), new PropertyMetadata(new ObservableCollection<Part>()));
+        public static readonly DependencyProperty BackSideItemsProperty = DependencyProperty.Register("BackSideItems", typeof(object), typeof(MachineListItem), new PropertyMetadata(new object()));
 
         public ICommand DeleteCommand
         {
@@ -54,6 +70,18 @@ namespace InventoryAndProjectManagement
         }
 
         public static readonly DependencyProperty IdProperty = DependencyProperty.Register("Id", typeof(int), typeof(MachineListItem));
+
+        private object _deleteData;
+
+        public object DeleteData
+        {
+            get => _deleteData;
+            private set
+            {
+                _deleteData = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         private double _gridHeight;
 
@@ -110,6 +138,12 @@ namespace InventoryAndProjectManagement
             {
                 (FindResource("HoverExit") as Storyboard).Begin();
             }
+        }
+
+        private void MachineItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (BackSideItems is ObservableCollection<Part>) DeleteData = new Machine(Id, Description, Title);
+            else DeleteData = new Part(Id, Title, Description, 0);
         }
     }
 }

@@ -25,8 +25,19 @@ namespace InventoryAndProjectManagement
         private List<string> _searchWords;
         private bool _requery = false;
         private bool _isDialogOpen = false;
+        private string _machineOrPartNameToDelete = "";
 
         public int MachineOrPartIdToDelete { get; set; } = 0;
+
+        public string MachineOrPartNameToDelete
+        {
+            get => _machineOrPartNameToDelete;
+            set
+            {
+                _machineOrPartNameToDelete = value;
+                OnPropertyChanged("MachineOrPartNameToDelete");
+            }
+        }
 
         public bool IsDialogOpen
         {
@@ -38,11 +49,20 @@ namespace InventoryAndProjectManagement
             }
         }
 
-        public ICommand DeleteMachineCommand => new RelayCommand<int>(DeleteMachineDialogPopUp);
+        public ICommand DeleteMachineCommand => new RelayCommand<object>(DeleteMachineDialogPopUp);
 
-        private void DeleteMachineDialogPopUp(int aId)
+        private void DeleteMachineDialogPopUp(object aData)
         {
-            MachineOrPartIdToDelete = aId;
+            if (aData is Machine aMachine)
+            {
+                MachineOrPartIdToDelete = aMachine.Id;
+                MachineOrPartNameToDelete = aMachine.Name;
+            }
+            else if (aData is Part aPart)
+            {
+                MachineOrPartIdToDelete = aPart.Id;
+                MachineOrPartNameToDelete = aPart.Description;
+            }
             IsDialogOpen = true;
         }
 
@@ -107,7 +127,7 @@ namespace InventoryAndProjectManagement
             {
                 if (PartsVisibility == Visibility.Visible && _searchWords != null)
                 {
-                    FilteredItemsCount = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower())))).Count;
+                    FilteredItemsCount = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Description.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower())))).Count;
                 }
                 else if (_searchWords != null)
                 {
@@ -126,7 +146,7 @@ namespace InventoryAndProjectManagement
 
                     if (_searchWords != null)
                     {
-                        filteredList = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Descr.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower()))));
+                        filteredList = new ObservableCollection<Part>(Parts.Where(part => _searchWords.Any(searchPart => part.Description.ToLower().Contains(searchPart.ToLower()) || part.Number.ToLower().Contains(searchPart.ToLower()))));
                     }
                     else
                     {

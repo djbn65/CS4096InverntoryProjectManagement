@@ -14,10 +14,12 @@
              TextOptions.TextRenderingMode="Auto"
              MouseEnter="MachineItem_MouseEnter"
              MouseLeave="MachineItem_MouseLeave"
-             Cursor="Hand">
+             Cursor="Hand"
+             Loaded="MachineItem_Loaded">
     <UserControl.Resources>
         <local:TitleToAbbrConverter x:Key="MachTitleToAbbrConverter" />
         <local:ImgPathToImgVisibilityConverter x:Key="ImgPathVisibilityConverter" />
+        <local:BackSideItemsConverter x:Key="BackSideItemsConverter" />
 
         <Style TargetType="{x:Type ToolTip}">
             <Setter Property="OverridesDefaultStyle" Value="true" />
@@ -114,7 +116,7 @@
                                 ToolTip="Delete"
                                 Name="Delete"
                                 Command="{Binding ElementName=MachineItem, Path=DeleteCommand}"
-                                CommandParameter="{Binding ElementName=MachineItem, Path=Id}">
+                                CommandParameter="{Binding ElementName=MachineItem, Path=DeleteData}">
                                 <Button.Triggers>
                                     <EventTrigger RoutedEvent="Button.MouseEnter">
                                         <BeginStoryboard>
@@ -245,7 +247,7 @@
                             </Viewbox>
                         </StackPanel>
                         <materialDesign:Card Grid.Row="1" Margin="0, 20, 0, 20">
-                            <ListView ItemsSource="{Binding Parts, ElementName=MachineItem}">
+                            <ListView ItemsSource="{Binding BackSideItems, ElementName=MachineItem, Converter={StaticResource BackSideItemsConverter}}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderThickness="0, 0, 0, 1" Margin="15, 0">
@@ -260,7 +262,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel>
-                                                    <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding Descr}" />
+                                                    <TextBlock TextTrimming="CharacterEllipsis"  FontWeight="Medium" FontSize="20" Text="{Binding Description}" />
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="Amount Needed: " />
                                                         <TextBlock Text="{Binding Quantity}" />

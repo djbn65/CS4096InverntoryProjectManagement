@@ -87,6 +87,7 @@
     <Compile Include="Machine.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Part.cs" />
+    <Compile Include="NullableIntToString.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />
     <Page Include="MachineListItem.xaml">
       <SubType>Designer</SubType>

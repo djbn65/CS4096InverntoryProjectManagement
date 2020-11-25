@@ -109,119 +109,26 @@
                             </Grid.ColumnDefinitions>
 
                             <Button
-                                Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
-                                Foreground="{StaticResource PrimaryHueMidBrush}"
-                                BorderBrush="Transparent"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                                ToolTip="Delete"
-                                Name="Delete"
-                                Command="{Binding ElementName=MachineItem, Path=DeleteCommand}"
-                                CommandParameter="{Binding ElementName=MachineItem, Path=DeleteData}">
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Button.MouseEnter">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation
-                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                Storyboard.Target="{Binding ElementName=Delete}"
-                                                To="Black"
-                                                Duration="0:0:0.1" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                    <EventTrigger RoutedEvent="Button.MouseLeave">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation
-                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                Storyboard.Target="{Binding ElementName=Delete}"
-                                                To="Transparent"
-                                                Duration="0:0:0.1" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
-
-                                <Button.Background>
-                                    <SolidColorBrush Color="Transparent" Opacity="0.05" />
-                                </Button.Background>
-                            </Button>
+                                    Content="{materialDesign:PackIcon Kind=Trash, Size=25}"
+                                    Foreground="{StaticResource PrimaryHueMidBrush}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    ToolTip="Delete"
+                                    Command="{Binding ElementName=MachineItem, Path=DeleteCommand}"
+                                    CommandParameter="{Binding ElementName=MachineItem, Path=DeleteData}" />
                             <StackPanel
-                        Orientation="Horizontal"
-                        Grid.Column="1"
-                        HorizontalAlignment="Right">
+                                Orientation="Horizontal"
+                                Grid.Column="1"
+                                HorizontalAlignment="Right">
                                 <Button
-                                Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
-                                Foreground="{StaticResource SecondaryHueMidBrush}"
-                                BorderBrush="Transparent"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                                ToolTip="Finished"
-                                Name="Finished">
-                                    <Button.Triggers>
-                                        <EventTrigger RoutedEvent="Button.MouseEnter">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    Storyboard.Target="{Binding ElementName=Finished}"
-                                                    To="Black"
-                                                    Duration="0:0:0.1" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                        <EventTrigger RoutedEvent="Button.MouseLeave">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    Storyboard.Target="{Binding ElementName=Finished}"
-                                                    To="Transparent"
-                                                    Duration="0:0:0.1" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </Button.Triggers>
-
-                                    <Button.Background>
-                                        <SolidColorBrush Color="Transparent" Opacity="0.05" />
-                                    </Button.Background>
-                                </Button>
+                                    Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
+                                    Foreground="{StaticResource SecondaryHueMidBrush}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    ToolTip="Finished" />
                                 <Button
-                                Content="{materialDesign:PackIcon Kind=InformationCircleOutline, Size=25}"
-                                Foreground="{StaticResource SecondaryHueMidBrush}"
-                                BorderBrush="Transparent"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                                ToolTip="More Information"
-                                Name="More">
-                                    <Button.Triggers>
-                                        <EventTrigger RoutedEvent="Button.MouseEnter">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    Storyboard.Target="{Binding ElementName=More}"
-                                                    To="Black"
-                                                    Duration="0:0:0.1" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                        <EventTrigger RoutedEvent="Button.MouseLeave">
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                    Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    Storyboard.Target="{Binding ElementName=More}"
-                                                    To="Transparent"
-                                                    Duration="0:0:0.1" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </Button.Triggers>
-
-                                    <Button.Background>
-                                        <SolidColorBrush Color="Transparent" Opacity="0.05" />
-                                    </Button.Background>
-                                </Button>
+                                    Content="{materialDesign:PackIcon Kind=InformationCircleOutline}"
+                                    Foreground="{StaticResource SecondaryHueMidBrush}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    ToolTip="More Information" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>

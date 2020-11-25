@@ -10,9 +10,9 @@ namespace InventoryAndProjectManagement
         public string Description { get; set; }
         public int Quantity { get; set; }
 
-        private int _quantityNeeded = 0;
+        private int? _quantityNeeded;
 
-        public int QuantityNeeded
+        public int? QuantityNeeded
         {
             get => _quantityNeeded;
             set

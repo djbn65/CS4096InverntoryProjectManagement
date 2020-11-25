@@ -12,6 +12,18 @@ namespace InventoryAndProjectManagement
         public string Name { get; set; }
         public string Description { get; set; }
 
+        private int? _quantityNeeded;
+
+        public int? QuantityNeeded
+        {
+            get => _quantityNeeded;
+            set
+            {
+                _quantityNeeded = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private bool _isSelected = false;
 
         public bool IsSelected

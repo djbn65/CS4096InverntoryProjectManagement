@@ -24,6 +24,13 @@ namespace InventoryAndProjectManagement
             InitializeComponent();
         }
 
+        public void SwitchTabs()
+        {
+            PageValue.TextChanged -= PageValue_TextChanged;
+            Data.SwitchTabs();
+            PageValue.TextChanged += PageValue_TextChanged;
+        }
+
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             if (Machines != null)
@@ -36,6 +43,7 @@ namespace InventoryAndProjectManagement
 
                 Data.MachineVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
                 Data.PartsVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
+                SwitchTabs();
             }
         }
 
@@ -271,34 +279,24 @@ namespace InventoryAndProjectManagement
             Data.PageNum = 1;
         }
 
-        private static readonly Regex _regex = new Regex("[0-9]*"); //regex that matches disallowed text
-
-        private void PageValue_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            e.Handled = !_regex.IsMatch(e.Text);
-        }
-
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            --Data.PageNum;
+            Data.SetPageNum((int)Data.PageNum - 1, true);
         }
 
         private void Beginning_Click(object sender, RoutedEventArgs e)
         {
-            Data.PageNum = 1;
+            Data.SetPageNum(1, true);
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            ++Data.PageNum;
+            Data.SetPageNum((int)Data.PageNum + 1, true);
         }
 
         private void End_Click(object sender, RoutedEventArgs e)
         {
-            if (Data.PartsVisibility == Visibility.Visible)
-            {
-                Data.PageNum = (int)Math.Ceiling((double)Data.FilteredItemsCount / Data.ItemsPerPage);
-            }
+            Data.SetPageNum((int)Math.Ceiling((double)Data.FilteredItemsCount / Data.ItemsPerPage), true);
         }
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -325,22 +323,73 @@ namespace InventoryAndProjectManagement
             List<Part> partsToAdd = new List<Part>();
             foreach (Part part in Data.Parts.Where(part => part.IsSelected == true))
             {
-                partsToAdd.Add(new Part(part.Id, part.Number, part.Description, part.QuantityNeeded));
+                partsToAdd.Add(new Part(part.Id, part.Number, part.Description, (int)part.QuantityNeeded));
                 part.IsSelected = false;
                 part.QuantityNeeded = 0;
             }
 
-            Data.Machines.Add(new Machine(Data.Machines.Last().Id + 1, MachineName.Text, MachineDescription.Text, partsToAdd));
+            Data.Machines.Add(new Machine(Data.Machines.Last().Id + 1, Data.AddNameText, Data.AddDescriptionText, partsToAdd));
             // TODO: Actually add item to the database
 
-            MachineDescription.Text = MachineName.Text = "";
+            Data.AddNameText = Data.AddDescriptionText = "";
 
-            PopUpArea.Visibility = Visibility.Hidden;
+            Data.IsDialogOpen = false;
+            End_Click(null, null);
         }
 
         private void ActionsButton_Click(object sender, RoutedEventArgs e)
         {
-            PopUpArea.Visibility = Visibility.Visible;
+            if (Data.MachineVisibility == Visibility.Visible)
+            {
+                Data.DialogContent = FindResource("AddMachineContent");
+            }
+            else
+            {
+                Data.DialogContent = FindResource("AddPartContent");
+            }
+            Data.IsDialogOpen = true;
+        }
+
+        private void CancelCreation_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (Part part in Data.Parts.Where(part => part.IsSelected == true))
+            {
+                part.IsSelected = false;
+            }
+            Data.AddNameText = Data.AddDescriptionText = "";
+
+            Data.IsDialogOpen = false;
+        }
+
+        private void CreatePart_Click(object sender, RoutedEventArgs e)
+        {
+            Part newPart = new Part(Data.Parts.Last().Id + 1, Data.AddNameText, Data.AddDescriptionText, (int)Data.AddQuantityValue);
+            Data.Parts.Add(newPart);
+
+            // Add part to all selected machines in quantity desired
+            foreach (Machine machine in Data.Machines.Where(machine => machine.IsSelected == true))
+            {
+                machine.PartList.Add(new Part(newPart.Id, newPart.Number, newPart.Description, (int)machine.QuantityNeeded));
+                machine.QuantityNeeded = 0;
+                machine.IsSelected = false;
+            }
+            // TODO: Actually add item to the database
+
+            Data.AddNameText = Data.AddDescriptionText = "";
+            Data.AddQuantityValue = 0;
+
+            Data.IsDialogOpen = false;
+            End_Click(null, null);
+        }
+
+        private void PreviewTextInputNumericValidation(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = Regex.IsMatch(e.Text, "[^0-9]+") || e.Text == "";
+        }
+
+        private void PageValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (Data.PageNum != null) Data.SetPageNum((int)Data.PageNum);
         }
     }
 }

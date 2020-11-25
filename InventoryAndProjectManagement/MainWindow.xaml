@@ -26,6 +26,8 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <local:NullableIntToString x:Key="NullableIntToStringConverter" />
+
             <Style x:Key="ToolTipStyle" TargetType="{x:Type ToolTip}">
                 <Setter Property="OverridesDefaultStyle" Value="true" />
                 <Setter Property="HasDropShadow" Value="True" />
@@ -50,14 +52,198 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-        </ResourceDictionary>
-    </Window.Resources>
 
-    <materialDesign:DialogHost
-        IsOpen="{Binding IsDialogOpen}"
-        DialogClosing="DialogHost_DialogClosing">
-        <materialDesign:DialogHost.DialogContent>
-            <StackPanel Margin="16" MaxWidth="{Binding ElementName=TheWindow, Path=ActualWidth}">
+            <Grid x:Key="AddMachineContent" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="MaxHeight" Value="{Binding ElementName=Machines, Path=ActualHeight}" />
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel>
+                    <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold">Add Machine</TextBlock>
+                    <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Details</TextBlock>
+                    <TextBox
+                        Text="{Binding AddNameText}"
+                        materialDesign:HintAssist.Hint="Name"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        HorizontalAlignment="Center"
+                        FontSize="16"
+                        Margin="0, 0, 0, 15" />
+                    <TextBox
+                        Text="{Binding AddDescriptionText}"
+                        materialDesign:HintAssist.Hint="Description"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        HorizontalAlignment="Center"
+                        FontSize="16" />
+                    <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Parts</TextBlock>
+                </StackPanel>
+
+                <DataGrid Name="PartsToUse" Grid.Row="1" ItemsSource="{Binding Parts}" AutoGenerateColumns="False" Style="{StaticResource MaterialDesignDataGrid}" CanUserResizeColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn
+                            x:Name="RowCheckBox"
+                            Binding="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                            ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                            EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
+                            Header="Use Part">
+                            <DataGridCheckBoxColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                            </DataGridCheckBoxColumn.CellStyle>
+                        </DataGridCheckBoxColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox
+                                        Text="{Binding QuantityNeeded, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntToStringConverter}}"
+                                        IsEnabled="{Binding IsSelected}"
+                                        HorizontalAlignment="Stretch"
+                                        TextAlignment="Center"
+                                        Style="{StaticResource MaterialDesignTextBox}"
+                                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock>Quantity Needed</TextBlock>
+                            </DataGridTemplateColumn.Header>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Binding="{Binding Path=Number}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
+                            <DataGridTextColumn.Header>
+                                <TextBlock>Part Number</TextBlock>
+                            </DataGridTextColumn.Header>
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Path=Description}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
+                            <DataGridTextColumn.Header>
+                                <TextBlock>Description</TextBlock>
+                            </DataGridTextColumn.Header>
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <UniformGrid Grid.Row="2" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
+                    <Button x:Name="CreateMachine" Grid.Row="2" Margin="0, 0, 10, 0" Style="{StaticResource MaterialDesignRaisedAccentButton}" Click="CreateMachine_Click">Create Machine</Button>
+                    <Button x:Name="CancelCreation" Grid.Row="2" Click="CancelCreation_Click">Cancel</Button>
+                </UniformGrid>
+            </Grid>
+
+            <Grid x:Key="AddPartContent" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="MaxHeight" Value="{Binding ElementName=Machines, Path=ActualHeight}" />
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel>
+                    <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold">Add Part</TextBlock>
+                    <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Details</TextBlock>
+                    <TextBox
+                        Text="{Binding AddNameText}"
+                        materialDesign:HintAssist.Hint="Name"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                        FontSize="16"
+                        Margin="0, 0, 0, 15" />
+                    <TextBox
+                        Text="{Binding AddDescriptionText}"
+                        materialDesign:HintAssist.Hint="Description"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                        FontSize="16"
+                        Margin="0, 0, 0, 15" />
+                    <TextBox
+                        materialDesign:HintAssist.Hint="Quantity"
+                        Text="{Binding AddQuantityValue, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntToStringConverter}}"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        HorizontalAlignment="Center"
+                        FontSize="16"
+                        Margin="0, 0, 0, 15"
+                        TextAlignment="Center"
+                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                </StackPanel>
+                <DataGrid Name="MachinesToAddTo" Grid.Row="1" ItemsSource="{Binding Machines}" AutoGenerateColumns="False" Style="{StaticResource MaterialDesignDataGrid}" CanUserResizeColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn
+                            Binding="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                            ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                            EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
+                            Header="Use In Machine">
+                            <DataGridCheckBoxColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                            </DataGridCheckBoxColumn.CellStyle>
+                        </DataGridCheckBoxColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox
+                                        Text="{Binding QuantityNeeded, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntToStringConverter}}"
+                                        IsEnabled="{Binding IsSelected}"
+                                        HorizontalAlignment="Stretch"
+                                        TextAlignment="Center"
+                                        Style="{StaticResource MaterialDesignTextBox}"
+                                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock>Amount Needed in Machine</TextBlock>
+                            </DataGridTemplateColumn.Header>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Binding="{Binding Path=Name}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
+                            <DataGridTextColumn.Header>
+                                <TextBlock>Part Number</TextBlock>
+                            </DataGridTextColumn.Header>
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding Path=Description}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
+                            <DataGridTextColumn.Header>
+                                <TextBlock>Description</TextBlock>
+                            </DataGridTextColumn.Header>
+                            <DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <UniformGrid Grid.Row="2" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
+                    <Button x:Name="CreatePart" Grid.Row="2" Margin="0, 0, 10, 0" Style="{StaticResource MaterialDesignRaisedAccentButton}" Click="CreatePart_Click">Create Part</Button>
+                    <Button x:Name="CancelPartCreation" Grid.Row="2" Click="CancelCreation_Click">Cancel</Button>
+                </UniformGrid>
+            </Grid>
+
+            <StackPanel x:Key="ConfirmContent" Margin="16" MaxWidth="{Binding ElementName=TheWindow, Path=ActualWidth}">
                 <TextBlock FontSize="18" TextWrapping="Wrap" TextAlignment="Center">Are you sure you want to delete <Run Text="{Binding MachineOrPartNameToDelete}" FontWeight="Bold" />?</TextBlock>
                 <StackPanel
                     Orientation="Horizontal"
@@ -85,8 +271,15 @@
                     </Button>
                 </StackPanel>
             </StackPanel>
-        </materialDesign:DialogHost.DialogContent>
+        </ResourceDictionary>
+    </Window.Resources>
 
+    <materialDesign:DialogHost
+        x:Name="PopUpDialog"
+        IsOpen="{Binding IsDialogOpen}"
+        DialogClosing="DialogHost_DialogClosing"
+        DialogContent="{Binding DialogContent}"
+        DialogMargin="0">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -193,99 +386,46 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="1" x:Name="PopUpArea" Visibility="Hidden">
-                <StackPanel.Background>
-                    <SolidColorBrush Opacity="0.5" Color="Black" />
-                </StackPanel.Background>
-
-                <materialDesign:Card Grid.Row="1" x:Name="AddMachinePopUp" HorizontalAlignment="Center" Padding="20" MaxHeight="{Binding ElementName=Machines, Path=ActualHeight}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <StackPanel>
-                            <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold">Add Machine</TextBlock>
-                            <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Details</TextBlock>
-                            <TextBox
-                                x:Name="MachineName"
-                                materialDesign:HintAssist.Hint="Name"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                HorizontalAlignment="Center"
-                                FontSize="16"
-                                Margin="0, 0, 0, 15" />
-                            <TextBox
-                                x:Name="MachineDescription"
-                                materialDesign:HintAssist.Hint="Description"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                HorizontalAlignment="Center"
-                                FontSize="16" />
-                            <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Parts</TextBlock>
-                        </StackPanel>
-
-                        <DataGrid x:Name="PartsToUse" Grid.Row="1" ItemsSource="{Binding Parts}" AutoGenerateColumns="False" Style="{StaticResource MaterialDesignDataGrid}" CanUserResizeColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridCheckBoxColumn
-                                    x:Name="RowCheckBox"
-                                    CellStyle="{StaticResource MaterialDesignDataGridCell}"
-                                    Binding="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                    ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                    EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}">
-                                </DataGridCheckBoxColumn>
-                                <DataGridTemplateColumn>
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBox Text="{Binding QuantityNeeded, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsSelected}" HorizontalAlignment="Stretch" TextAlignment="Center" Style="{StaticResource MaterialDesignTextBox}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                    <DataGridTemplateColumn.Header>
-                                        <TextBlock>Quantity Needed</TextBlock>
-                                    </DataGridTemplateColumn.Header>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Binding="{Binding Path=Number}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
-                                    <DataGridTextColumn.Header>
-                                        <TextBlock>Part Number</TextBlock>
-                                    </DataGridTextColumn.Header>
-                                    <DataGridTextColumn.HeaderStyle>
-                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                        </Style>
-                                    </DataGridTextColumn.HeaderStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding Path=Description}" IsReadOnly="True" CellStyle="{StaticResource MaterialDesignDataGridCell}">
-                                    <DataGridTextColumn.Header>
-                                        <TextBlock>Description</TextBlock>
-                                    </DataGridTextColumn.Header>
-                                    <DataGridTextColumn.HeaderStyle>
-                                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                        </Style>
-                                    </DataGridTextColumn.HeaderStyle>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-
-                            <DataGrid.ItemContainerStyle>
-                                <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
-                                    <Style.Setters>
-                                        <Setter Property="Cursor" Value="Hand" />
-                                    </Style.Setters>
-                                </Style>
-                            </DataGrid.ItemContainerStyle>
-                        </DataGrid>
-
-                        <Button x:Name="CreateMachine" Grid.Row="2" Margin="0, 20, 0, 0" Click="CreateMachine_Click">Create Machine</Button>
-                    </Grid>
-                </materialDesign:Card>
-            </StackPanel>
-
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 15">
-                <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleLeft}" Click="Beginning_Click" />
-                <Button IsEnabled="{Binding BackEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronLeft}" Click="Back_Click" />
-                <TextBox materialDesign:HintAssist.HelperText="" x:Name="PageValue" VerticalAlignment="Center" Grid.Column="1" Text="{Binding PageNum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="30" Margin="10, 0" TextAlignment="Center" PreviewTextInput="PageValue_PreviewTextInput" />
-                <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronRight}" Click="Next_Click" />
-                <Button IsEnabled="{Binding NextEnabled}" Width="Auto" Height="Auto" Style="{StaticResource MaterialDesignIconButton}" Content="{materialDesign:PackIcon Kind=ChevronDoubleRight}" Click="End_Click" />
+                <Button
+                    IsEnabled="{Binding BackEnabled}"
+                    Width="Auto"
+                    Height="Auto"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    Content="{materialDesign:PackIcon Kind=ChevronDoubleLeft}"
+                    Click="Beginning_Click" />
+                <Button
+                    IsEnabled="{Binding BackEnabled}"
+                    Width="Auto"
+                    Height="Auto"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    Content="{materialDesign:PackIcon Kind=ChevronLeft}"
+                    Click="Back_Click" />
+                <TextBox
+                    materialDesign:HintAssist.HelperText=""
+                    x:Name="PageValue"
+                    VerticalAlignment="Center"
+                    Grid.Column="1"
+                    Text="{Binding PageNum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntToStringConverter}}"
+                    MinWidth="30"
+                    Margin="10, 0"
+                    TextAlignment="Center"
+                    PreviewTextInput="PreviewTextInputNumericValidation"
+                    TextChanged="PageValue_TextChanged" />
+                <Button
+                    IsEnabled="{Binding NextEnabled}"
+                    Width="Auto"
+                    Height="Auto"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    Content="{materialDesign:PackIcon Kind=ChevronRight}"
+                    Click="Next_Click" />
+                <Button
+                    IsEnabled="{Binding NextEnabled}"
+                    Width="Auto"
+                    Height="Auto"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    Content="{materialDesign:PackIcon Kind=ChevronDoubleRight}"
+                    Click="End_Click" />
             </StackPanel>
         </Grid>
     </materialDesign:DialogHost>

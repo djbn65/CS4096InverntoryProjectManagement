@@ -236,9 +236,10 @@ namespace InventoryAndProjectManagement
             // TODO: We need to probably change this to a company production server when we give it to them
             using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
             {
+                connection.Open();
+
                 SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
                 SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
-                partsCommand.Connection.Open();
 
                 using (SqlDataReader reader = partsCommand.ExecuteReader())
                 {
@@ -263,7 +264,7 @@ namespace InventoryAndProjectManagement
 
                 foreach (Machine machine in Data.Machines)
                 {
-                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, MACHINE_STEPS ms, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = ms.machine_id and ms.step_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
+                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
 
                     using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
                     {
@@ -277,6 +278,13 @@ namespace InventoryAndProjectManagement
             }
 
             Data.PageNum = 1;
+            Data.Machines.CollectionChanged += PartsOrMachinesCollectionChanged;
+            Data.Parts.CollectionChanged += PartsOrMachinesCollectionChanged;
+        }
+
+        private void PartsOrMachinesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Data.Refresh();
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -311,7 +319,27 @@ namespace InventoryAndProjectManagement
         {
             if ((bool)eventArgs.Parameter)
             {
-                if (Data.MachineVisibility == Visibility.Visible) Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == Data.MachineOrPartIdToDelete));
+                if (Data.MachineVisibility == Visibility.Visible)
+                {
+                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    {
+                        try
+                        {
+                            connection.Open();
+
+                            SqlCommand deleteMachineCommand = new SqlCommand(string.Format("DELETE FROM MACHINES WHERE machine_id = {0};", Data.MachineOrPartIdToDelete), connection);
+
+                            if (deleteMachineCommand.ExecuteNonQuery() == 1)
+                            {
+                                Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == Data.MachineOrPartIdToDelete));
+                            }
+                        }
+                        catch
+                        {
+                            // Handle exception
+                        }
+                    }
+                }
                 else Data.Parts.Remove(Data.Parts.Single(part => part.Id == Data.MachineOrPartIdToDelete));
 
                 // TODO: Actually delete the item from the database as well
@@ -320,21 +348,78 @@ namespace InventoryAndProjectManagement
 
         private void CreateMachine_Click(object sender, RoutedEventArgs e)
         {
-            List<Part> partsToAdd = new List<Part>();
-            foreach (Part part in Data.Parts.Where(part => part.IsSelected == true))
+            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
             {
-                partsToAdd.Add(new Part(part.Id, part.Number, part.Description, (int)part.QuantityNeeded));
-                part.IsSelected = false;
-                part.QuantityNeeded = 0;
+                try
+                {
+                    connection.Open();
+
+                    SqlCommand addMachineCommand = new SqlCommand(string.Format("INSERT INTO MACHINES (machine_name, machine_description) VALUES ('{0}', '{1}'); SELECT SCOPE_IDENTITY();", Data.AddNameText, Data.AddDescriptionText), connection);
+
+                    if (int.TryParse(addMachineCommand.ExecuteScalar().ToString(), out int newId))
+                    {
+                        SqlCommand addStepCommand = new SqlCommand(string.Format("INSERT INTO STEPS (step_id, step_number, step_description) VALUES ({0}, 1, 'First Step')", newId), connection);
+
+                        // Add the step for this machine
+                        if (addStepCommand.ExecuteNonQuery() == 1)
+                        {
+                            // Add parts to new machine
+                            List<Part> failedParts = new List<Part>();
+                            List<Part> partsToAdd = new List<Part>();
+                            foreach (Part part in Data.Parts.Where(part => part.IsSelected == true))
+                            {
+                                SqlCommand addPartToMachineCommand = new SqlCommand(string.Format("INSERT INTO STEP_PARTS (step_id, step_number, part_id, part_amount) VALUES ({0}, 1, {1}, {2});", newId, part.Id, (int)part.QuantityNeeded), connection);
+
+                                try
+                                {
+                                    if (addPartToMachineCommand.ExecuteNonQuery() == 1)
+                                    {
+                                        partsToAdd.Add(new Part(part.Id, part.Number, part.Description, (int)part.QuantityNeeded));
+                                    }
+                                    else
+                                    {
+                                        failedParts.Add(new Part(part.Id, part.Number, part.Description, (int)part.QuantityNeeded));
+                                    }
+                                }
+                                catch
+                                {
+                                    failedParts.Add(new Part(part.Id, part.Number, part.Description, (int)part.QuantityNeeded));
+                                }
+
+                                part.IsSelected = false;
+                                part.QuantityNeeded = 0;
+                            }
+
+                            Data.Machines.Add(new Machine(newId, Data.AddNameText, Data.AddDescriptionText, partsToAdd));
+
+                            if (failedParts.Count > 0)
+                            {
+                                // TODO: Notify of failed parts
+                            }
+
+                            Data.AddNameText = Data.AddDescriptionText = "";
+
+                            Data.IsDialogOpen = false;
+                        }
+                    }
+                    else
+                    {
+                        // TODO: Handle Insert Failure
+                        // This means no rows were affected
+                    }
+                }
+                catch (SqlException exception)
+                {
+                    if (exception.Number == 2627) // Unique Key Constraint Violation
+                    {
+                        // TODO: Machine name already exists. Alert user
+                    }
+                }
+                catch
+                {
+                    // Handle other exception
+                }
             }
-
-            Data.Machines.Add(new Machine(Data.Machines.Last().Id + 1, Data.AddNameText, Data.AddDescriptionText, partsToAdd));
-            // TODO: Actually add item to the database
-
-            Data.AddNameText = Data.AddDescriptionText = "";
-
-            Data.IsDialogOpen = false;
-            End_Click(null, null);
         }
 
         private void ActionsButton_Click(object sender, RoutedEventArgs e)

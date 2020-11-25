@@ -323,5 +323,11 @@ namespace InventoryAndProjectManagement
                 PageNum = _pageNumMachines;
             }
         }
+
+        public void Refresh()
+        {
+            _requery = true;
+            PageNum = PageNum;
+        }
     }
 }

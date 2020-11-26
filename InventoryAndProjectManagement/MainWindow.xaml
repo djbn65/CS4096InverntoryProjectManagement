@@ -70,18 +70,36 @@
                     <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold">Add Machine</TextBlock>
                     <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Details</TextBlock>
                     <TextBox
-                        Text="{Binding AddNameText}"
-                        materialDesign:HintAssist.Hint="Name"
+                        materialDesign:HintAssist.Hint="Name        "
                         Style="{StaticResource MaterialDesignTextBox}"
                         HorizontalAlignment="Center"
                         FontSize="16"
-                        Margin="0, 0, 0, 15" />
+                        Margin="0, 0, 0, 15">
+                        <TextBox.Text>
+                            <Binding
+                                Path="AddNameText"
+                                UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBox
-                        Text="{Binding AddDescriptionText}"
                         materialDesign:HintAssist.Hint="Description"
                         Style="{StaticResource MaterialDesignTextBox}"
                         HorizontalAlignment="Center"
-                        FontSize="16" />
+                        FontSize="16">
+                        <TextBox.Text>
+                            <Binding
+                                Path="AddDescriptionText"
+                                UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Parts</TextBlock>
                 </StackPanel>
 
@@ -107,8 +125,8 @@
                                         IsEnabled="{Binding IsSelected}"
                                         HorizontalAlignment="Stretch"
                                         TextAlignment="Center"
-                                        Style="{StaticResource MaterialDesignTextBox}"
-                                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                                        PreviewTextInput="PreviewTextInputNumericValidation"
+                                        LostFocus="ResetValueIfEmpty" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.Header>
@@ -139,8 +157,19 @@
                 </DataGrid>
 
                 <UniformGrid Grid.Row="2" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
-                    <Button x:Name="CreateMachine" Grid.Row="2" Margin="0, 0, 10, 0" Style="{StaticResource MaterialDesignRaisedAccentButton}" Click="CreateMachine_Click">Create Machine</Button>
-                    <Button x:Name="CancelCreation" Grid.Row="2" Click="CancelCreation_Click">Cancel</Button>
+                    <Button
+                        x:Name="CreateMachine"
+                        Grid.Row="2"
+                        Margin="0, 0, 10, 0"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Click="CreateMachine_Click"
+                        Content="Create Machine"
+                        IsEnabled="{Binding IsCreateMachineEnabled}" />
+                    <Button
+                        x:Name="CancelCreation"
+                        Grid.Row="2"
+                        Click="CancelCreation_Click"
+                        Content="Cancel" />
                 </UniformGrid>
             </Grid>
 
@@ -208,7 +237,8 @@
                                         HorizontalAlignment="Stretch"
                                         TextAlignment="Center"
                                         Style="{StaticResource MaterialDesignTextBox}"
-                                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                                        PreviewTextInput="PreviewTextInputNumericValidation"
+                                        LostFocus="ResetValueIfEmpty" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.Header>

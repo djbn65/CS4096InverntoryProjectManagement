@@ -86,6 +86,7 @@
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="NotEmptyValidationRule.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="NullableIntToString.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />

@@ -348,6 +348,8 @@ namespace InventoryAndProjectManagement
 
         private void CreateMachine_Click(object sender, RoutedEventArgs e)
         {
+            // Input validation
+
             using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
             {
                 try
@@ -387,7 +389,7 @@ namespace InventoryAndProjectManagement
                                 }
 
                                 part.IsSelected = false;
-                                part.QuantityNeeded = 0;
+                                part.QuantityNeeded = null;
                             }
 
                             Data.Machines.Add(new Machine(newId, Data.AddNameText, Data.AddDescriptionText, partsToAdd));
@@ -455,7 +457,7 @@ namespace InventoryAndProjectManagement
             foreach (Machine machine in Data.Machines.Where(machine => machine.IsSelected == true))
             {
                 machine.PartList.Add(new Part(newPart.Id, newPart.Number, newPart.Description, (int)machine.QuantityNeeded));
-                machine.QuantityNeeded = 0;
+                machine.QuantityNeeded = null;
                 machine.IsSelected = false;
             }
             // TODO: Actually add item to the database
@@ -475,6 +477,11 @@ namespace InventoryAndProjectManagement
         private void PageValue_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (Data.PageNum != null) Data.SetPageNum((int)Data.PageNum);
+        }
+
+        private void ResetValueIfEmpty(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && textBox.Text == "") textBox.Text = "0";
         }
     }
 }

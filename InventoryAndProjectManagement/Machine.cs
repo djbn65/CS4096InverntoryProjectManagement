@@ -12,7 +12,7 @@ namespace InventoryAndProjectManagement
         public string Name { get; set; }
         public string Description { get; set; }
 
-        private int? _quantityNeeded;
+        private int? _quantityNeeded = 0;
 
         public int? QuantityNeeded
         {
@@ -32,6 +32,9 @@ namespace InventoryAndProjectManagement
             set
             {
                 _isSelected = value;
+
+                if (IsSelected == false) QuantityNeeded = 0;
+
                 NotifyPropertyChanged();
             }
         }

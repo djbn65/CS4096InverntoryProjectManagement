@@ -32,6 +32,11 @@ namespace InventoryAndProjectManagement
         private string _addDescriptionText = "";
         private int? _addQuantityValue;
 
+        public bool IsCreateMachineEnabled
+        {
+            get => _addNameText != "" && _addDescriptionText != "";
+        }
+
         public int? AddQuantityValue
         {
             get => _addQuantityValue;
@@ -49,6 +54,7 @@ namespace InventoryAndProjectManagement
             {
                 _addNameText = value;
                 NotifyPropertyChanged();
+                NotifyPropertyChanged("IsCreateMachineEnabled");
             }
         }
 
@@ -59,6 +65,7 @@ namespace InventoryAndProjectManagement
             {
                 _addDescriptionText = value;
                 NotifyPropertyChanged();
+                NotifyPropertyChanged("IsCreateMachineEnabled");
             }
         }
 

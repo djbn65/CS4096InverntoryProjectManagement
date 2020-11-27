@@ -190,30 +190,51 @@
                     <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold">Add Part</TextBlock>
                     <TextBlock TextAlignment="Center" FontSize="18" FontWeight="Medium" Margin="0, 20, 0, 10">Details</TextBlock>
                     <TextBox
-                        Text="{Binding AddNameText}"
-                        materialDesign:HintAssist.Hint="Name"
+                        materialDesign:HintAssist.Hint="Name         "
                         Style="{StaticResource MaterialDesignTextBox}"
                         HorizontalAlignment="Center"
                         TextAlignment="Center"
                         FontSize="16"
-                        Margin="0, 0, 0, 15" />
+                        Margin="0, 0, 0, 15">
+                        <TextBox.Text>
+                            <Binding Path="AddNameText" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBox
-                        Text="{Binding AddDescriptionText}"
                         materialDesign:HintAssist.Hint="Description"
                         Style="{StaticResource MaterialDesignTextBox}"
                         HorizontalAlignment="Center"
                         TextAlignment="Center"
                         FontSize="16"
-                        Margin="0, 0, 0, 15" />
+                        Margin="0, 0, 0, 15">
+                        <TextBox.Text>
+                            <Binding Path="AddDescriptionText" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBox
-                        materialDesign:HintAssist.Hint="Quantity"
-                        Text="{Binding AddQuantityValue, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntToStringConverter}}"
+                        materialDesign:HintAssist.Hint="Quantity    "
                         Style="{StaticResource MaterialDesignTextBox}"
                         HorizontalAlignment="Center"
                         FontSize="16"
                         Margin="0, 0, 0, 15"
                         TextAlignment="Center"
-                        PreviewTextInput="PreviewTextInputNumericValidation" />
+                        PreviewTextInput="PreviewTextInputNumericValidation">
+                        <TextBox.Text>
+                            <Binding Path="AddQuantityValue" UpdateSourceTrigger="PropertyChanged" Converter="{StaticResource NullableIntToStringConverter}">
+                                <Binding.ValidationRules>
+                                    <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                 </StackPanel>
                 <DataGrid Name="MachinesToAddTo" Grid.Row="1" ItemsSource="{Binding Machines}" AutoGenerateColumns="False" Style="{StaticResource MaterialDesignDataGrid}" CanUserResizeColumns="False">
                     <DataGrid.Columns>
@@ -268,8 +289,19 @@
                     </DataGrid.Columns>
                 </DataGrid>
                 <UniformGrid Grid.Row="2" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
-                    <Button x:Name="CreatePart" Grid.Row="2" Margin="0, 0, 10, 0" Style="{StaticResource MaterialDesignRaisedAccentButton}" Click="CreatePart_Click">Create Part</Button>
-                    <Button x:Name="CancelPartCreation" Grid.Row="2" Click="CancelCreation_Click">Cancel</Button>
+                    <Button
+                        x:Name="CreatePart"
+                        Grid.Row="2"
+                        Margin="0, 0, 10, 0"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Click="CreatePart_Click"
+                        Content="Create Part"
+                        IsEnabled="{Binding IsCreatePartEnabled}" />
+                    <Button
+                        x:Name="CancelPartCreation"
+                        Grid.Row="2"
+                        Click="CancelCreation_Click"
+                        Content="Cancel" />
                 </UniformGrid>
             </Grid>
 

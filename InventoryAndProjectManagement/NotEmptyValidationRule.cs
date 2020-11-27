@@ -9,7 +9,7 @@ namespace InventoryAndProjectManagement
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            return string.IsNullOrWhiteSpace((GetBoundValue(value) as string).ToString())
+            return string.IsNullOrWhiteSpace(GetBoundValue(value)?.ToString())
                 ? new ValidationResult(false, "Field is required.")
                 : ValidationResult.ValidResult;
         }

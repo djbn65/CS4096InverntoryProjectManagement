@@ -37,6 +37,11 @@ namespace InventoryAndProjectManagement
             get => _addNameText != "" && _addDescriptionText != "";
         }
 
+        public bool IsCreatePartEnabled
+        {
+            get => _addNameText != "" && _addDescriptionText != "" && _addQuantityValue != null;
+        }
+
         public int? AddQuantityValue
         {
             get => _addQuantityValue;
@@ -44,6 +49,7 @@ namespace InventoryAndProjectManagement
             {
                 _addQuantityValue = value;
                 NotifyPropertyChanged();
+                NotifyPropertyChanged("IsCreatePartEnabled");
             }
         }
 
@@ -55,6 +61,7 @@ namespace InventoryAndProjectManagement
                 _addNameText = value;
                 NotifyPropertyChanged();
                 NotifyPropertyChanged("IsCreateMachineEnabled");
+                NotifyPropertyChanged("IsCreatePartEnabled");
             }
         }
 
@@ -66,6 +73,7 @@ namespace InventoryAndProjectManagement
                 _addDescriptionText = value;
                 NotifyPropertyChanged();
                 NotifyPropertyChanged("IsCreateMachineEnabled");
+                NotifyPropertyChanged("IsCreatePartEnabled");
             }
         }
 

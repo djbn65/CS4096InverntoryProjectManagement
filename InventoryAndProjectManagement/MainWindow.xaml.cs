@@ -6,7 +6,8 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
-using System.Threading;
+using GalaSoft.MvvmLight.Command;
+using MaterialDesignThemes.Wpf;
 
 namespace InventoryAndProjectManagement
 {
@@ -148,6 +149,19 @@ namespace InventoryAndProjectManagement
             cardFlipping = false;
         }
 
+        private void PopUpCardInfoClick(MachineListItem card)
+        {
+            if (currentlyPoppedUpCard == null && !cardFlipping)
+            {
+                if (Data.MachineVisibility == Visibility.Visible) currentPoppedUpCardCp = MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(card.DataContext) as ContentPresenter;
+                else currentPoppedUpCardCp = InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(card.DataContext) as ContentPresenter;
+
+                currentlyPoppedUpCard = card;
+                cardFlipping = true;
+                PopUpCard(card);
+            }
+        }
+
         private void PopUpCard(MachineListItem card)
         {
             Panel.SetZIndex(currentPoppedUpCardCp, 1);
@@ -281,11 +295,70 @@ namespace InventoryAndProjectManagement
             Data.PageNum = 1;
             Data.Machines.CollectionChanged += PartsOrMachinesCollectionChanged;
             Data.Parts.CollectionChanged += PartsOrMachinesCollectionChanged;
+            Data.InfoClickCommand = new RelayCommand<MachineListItem>(PopUpCardInfoClick);
+            Data.BackSideItemDeleteCommand = new RelayCommand<int>(BackSideItemDelete);
+            Data.DeleteMachineCommand = new RelayCommand<object>(DeleteMachineDialogPopUp);
         }
 
         private void PartsOrMachinesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             Data.Refresh();
+        }
+
+        private async void BackSideItemDelete(int aId)
+        {
+            if (Data.MachineVisibility == Visibility.Visible)
+            {
+                Data.MachineOrPartNameToDelete = string.Format("{0} from {1}", Data.Parts.Single(part => part.Id == aId).Description, currentlyPoppedUpCard.Title);
+
+                if ((bool)await PopUpDialog.ShowDialog(FindResource("ConfirmContent")))
+                {
+                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    {
+                        try
+                        {
+                            connection.Open();
+
+                            SqlCommand deletePartFromMachineCommand = new SqlCommand(
+                                string.Format(
+                                    "DELETE FROM STEP_PARTS" +
+                                    " WHERE step_id = {0} and step_number = 1 and part_id = {1};",
+                                    currentlyPoppedUpCard.Id, aId),
+                                connection
+                            );
+
+                            if (deletePartFromMachineCommand.ExecuteNonQuery() == 1)
+                            {
+                                Data.Machines.Single(machine => machine.Id == currentlyPoppedUpCard.Id).PartList.Remove(part => part.Id == aId);
+                            }
+                            else
+                            {
+                                // Notify of Failure
+                            }
+                        }
+                        catch
+                        {
+                            // Handle exception
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DeleteMachineDialogPopUp(object aData)
+        {
+            if (aData is Machine aMachine)
+            {
+                Data.MachineOrPartIdToDelete = aMachine.Id;
+                Data.MachineOrPartNameToDelete = aMachine.Name;
+            }
+            else if (aData is Part aPart)
+            {
+                Data.MachineOrPartIdToDelete = aPart.Id;
+                Data.MachineOrPartNameToDelete = aPart.Description;
+            }
+
+            PopUpDialog.ShowDialog(FindResource("ConfirmContent"), DeleteCardDialogCallback);
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -316,7 +389,7 @@ namespace InventoryAndProjectManagement
             }
         }
 
-        private void DialogHost_DialogClosing(object sender, MaterialDesignThemes.Wpf.DialogClosingEventArgs eventArgs)
+        private void DeleteCardDialogCallback(object sender, MaterialDesignThemes.Wpf.DialogClosingEventArgs eventArgs)
         {
             if ((bool)eventArgs.Parameter)
             {
@@ -457,15 +530,16 @@ namespace InventoryAndProjectManagement
 
         private void ActionsButton_Click(object sender, RoutedEventArgs e)
         {
+            object dialogContent;
             if (Data.MachineVisibility == Visibility.Visible)
             {
-                Data.DialogContent = FindResource("AddMachineContent");
+                dialogContent = FindResource("AddMachineContent");
             }
             else
             {
-                Data.DialogContent = FindResource("AddPartContent");
+                dialogContent = FindResource("AddPartContent");
             }
-            Data.IsDialogOpen = true;
+            PopUpDialog.ShowDialog(dialogContent);
         }
 
         private void CancelCreation_Click(object sender, RoutedEventArgs e)

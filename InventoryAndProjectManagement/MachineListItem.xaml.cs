@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -59,6 +60,32 @@ namespace InventoryAndProjectManagement
 
         public static readonly DependencyProperty DeleteCommandProperty = DependencyProperty.Register("DeleteCommand", typeof(ICommand), typeof(MachineListItem));
 
+        public ICommand InfoCommand
+        {
+            get => (ICommand)GetValue(InfoCommandProperty);
+            set
+            {
+                SetValue(InfoCommandProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty InfoCommandProperty = DependencyProperty.Register("InfoCommand", typeof(ICommand), typeof(MachineListItem));
+
+        public MachineListItem InfoCommandData => this;
+
+        public ICommand DeleteBacksideItemCommand
+        {
+            get => (ICommand)GetValue(DeleteBacksideItemCommandProperty);
+            set
+            {
+                SetValue(DeleteBacksideItemCommandProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty DeleteBacksideItemCommandProperty = DependencyProperty.Register("DeleteBacksideItemCommand", typeof(ICommand), typeof(MachineListItem));
+
         public int Id
         {
             get => (int)GetValue(IdProperty);
@@ -109,6 +136,18 @@ namespace InventoryAndProjectManagement
 
         private string _path = null;
         public string ImgPath { get => _path; set { _path = value; NotifyPropertyChanged(); } }
+
+        private bool _isCheckEnabled = false;
+
+        public bool IsCheckButtonEnabled
+        {
+            get => _isCheckEnabled;
+            set
+            {
+                _isCheckEnabled = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         public bool IsFlipped { get; set; } = false;
 

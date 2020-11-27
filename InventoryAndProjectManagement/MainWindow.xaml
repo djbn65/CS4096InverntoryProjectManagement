@@ -305,7 +305,13 @@
                 </UniformGrid>
             </Grid>
 
-            <StackPanel x:Key="ConfirmContent" Margin="16" MaxWidth="{Binding ElementName=TheWindow, Path=ActualWidth}">
+            <StackPanel x:Key="ConfirmContent" Margin="16">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="MaxWidth" Value="{Binding ElementName=TheWindow, Path=ActualWidth}" />
+                    </Style>
+                </StackPanel.Style>
+
                 <TextBlock FontSize="18" TextWrapping="Wrap" TextAlignment="Center">Are you sure you want to delete <Run Text="{Binding MachineOrPartNameToDelete}" FontWeight="Bold" />?</TextBlock>
                 <StackPanel
                     Orientation="Horizontal"
@@ -339,8 +345,6 @@
     <materialDesign:DialogHost
         x:Name="PopUpDialog"
         IsOpen="{Binding IsDialogOpen}"
-        DialogClosing="DialogHost_DialogClosing"
-        DialogContent="{Binding DialogContent}"
         DialogMargin="0">
         <Grid>
             <Grid.RowDefinitions>
@@ -420,7 +424,15 @@
                 <ItemsControl x:Name="MachinesItemsControl" ItemsSource="{Binding MachinesToShow}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <local:MachineListItem Description="{Binding Description}" Title="{Binding Name}" BackSideItems="{Binding PartList}" Id="{Binding Id}" DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}" Margin="20" />
+                            <local:MachineListItem
+                                Description="{Binding Description}"
+                                Title="{Binding Name}"
+                                BackSideItems="{Binding PartList}"
+                                Id="{Binding Id}"
+                                DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}"
+                                InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
+                                DeleteBacksideItemCommand="{Binding ElementName=Data, Path=BackSideItemDeleteCommand}"
+                                Margin="20" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 
@@ -436,7 +448,13 @@
                 <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <local:MachineListItem Title="{Binding Number}" Description="{Binding Description}" Id="{Binding Id}" DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}" Margin="20" />
+                            <local:MachineListItem
+                                Title="{Binding Number}"
+                                Description="{Binding Description}"
+                                Id="{Binding Id}"
+                                DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}"
+                                InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
+                                Margin="20" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 

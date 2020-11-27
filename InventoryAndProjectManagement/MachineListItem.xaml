@@ -123,12 +123,15 @@
                                     Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
                                     Foreground="{StaticResource SecondaryHueMidBrush}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    ToolTip="Finished" />
+                                    ToolTip="Finished"
+                                    Visibility="{Binding ElementName=MachineItem, Path=IsCheckButtonEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 <Button
                                     Content="{materialDesign:PackIcon Kind=InformationCircleOutline}"
                                     Foreground="{StaticResource SecondaryHueMidBrush}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    ToolTip="More Information" />
+                                    ToolTip="More Information"
+                                    Command="{Binding ElementName=MachineItem, Path=InfoCommand}"
+                                    CommandParameter="{Binding ElementName=MachineItem, Path=InfoCommandData}" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -176,8 +179,16 @@
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
-                                                    <Button Content="{materialDesign:PackIcon Kind=Pencil}" Style="{StaticResource MaterialDesignFlatAccentBgButton}" materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
-                                                    <Button Content="{materialDesign:PackIcon Kind=Trash}" Style="{StaticResource MaterialDesignFlatMidBgButton}" materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0" />
+                                                    <Button
+                                                        Content="{materialDesign:PackIcon Kind=Pencil}"
+                                                        Style="{StaticResource MaterialDesignFlatAccentBgButton}"
+                                                        materialDesign:ButtonAssist.CornerRadius="3, 0, 0, 3" />
+                                                    <Button
+                                                        Content="{materialDesign:PackIcon Kind=Trash}"
+                                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                                                        materialDesign:ButtonAssist.CornerRadius="0, 3, 3, 0"
+                                                        Command="{Binding ElementName=MachineItem, Path=DeleteBacksideItemCommand}"
+                                                        CommandParameter="{Binding Id}" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

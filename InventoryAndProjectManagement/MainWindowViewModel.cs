@@ -99,33 +99,40 @@ namespace InventoryAndProjectManagement
             }
         }
 
-        public object DialogContent
+        private ICommand _deleteMachineCommand;
+
+        public ICommand DeleteMachineCommand
         {
-            get => _dialogContent;
+            get => _deleteMachineCommand;
             set
             {
-                _dialogContent = value;
+                _deleteMachineCommand = value;
                 NotifyPropertyChanged();
             }
         }
 
-        public ICommand DeleteMachineCommand => new RelayCommand<object>(DeleteMachineDialogPopUp);
+        private ICommand _infoClickCommand;
 
-        private void DeleteMachineDialogPopUp(object aData)
+        public ICommand InfoClickCommand
         {
-            if (aData is Machine aMachine)
+            get => _infoClickCommand;
+            set
             {
-                MachineOrPartIdToDelete = aMachine.Id;
-                MachineOrPartNameToDelete = aMachine.Name;
+                _infoClickCommand = value;
+                NotifyPropertyChanged();
             }
-            else if (aData is Part aPart)
-            {
-                MachineOrPartIdToDelete = aPart.Id;
-                MachineOrPartNameToDelete = aPart.Description;
-            }
+        }
 
-            DialogContent = Application.Current.MainWindow.FindResource("ConfirmContent");
-            IsDialogOpen = true;
+        private ICommand _backSideDeletecommand;
+
+        public ICommand BackSideItemDeleteCommand
+        {
+            get => _backSideDeletecommand;
+            set
+            {
+                _backSideDeletecommand = value;
+                NotifyPropertyChanged();
+            }
         }
 
         public string SearchText

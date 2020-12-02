@@ -312,7 +312,10 @@
                     </Style>
                 </StackPanel.Style>
 
-                <TextBlock FontSize="18" TextWrapping="Wrap" TextAlignment="Center">Are you sure you want to delete <Run Text="{Binding MachineOrPartNameToDelete}" FontWeight="Bold" />?</TextBlock>
+                <TextBlock
+                    FontSize="18"
+                    TextWrapping="Wrap"
+                    TextAlignment="Center">Are you sure you want to delete <Run Text="{Binding MachineOrPartNameToDelete}" FontWeight="Bold" />?</TextBlock>
                 <StackPanel
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
@@ -328,11 +331,11 @@
                     </Button>
 
                     <Button
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            IsCancel="True"
-                            Margin="0 8 8 0"
-                            Content="CANCEL"
-                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        IsCancel="True"
+                        Margin="0 8 8 0"
+                        Content="CANCEL"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
                         <Button.CommandParameter>
                             <system:Boolean>False</system:Boolean>
                         </Button.CommandParameter>
@@ -360,13 +363,15 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition MaxHeight="100" />
-                </Grid.RowDefinitions>
-
-                <StackPanel x:Name="CompanyInfo" Margin="30, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Image Source="Images/logo.png" Height="{Binding ActualHeight, ElementName=CompanyInfo}" />
-                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10, 0, 0, 0">Grover Machine Company</TextBlock>
+                <StackPanel
+                    x:Name="CompanyInfo"
+                    Margin="30, 0, 0, 0"
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left">
+                    <Image
+                        Source="Images/logo.png"
+                        Height="75" />
                 </StackPanel>
                 <StackPanel
                     x:Name="Tabs"
@@ -390,14 +395,14 @@
                         Cursor="Hand" />
                 </StackPanel>
                 <Border
-                BorderBrush="Black"
-                BorderThickness="2"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Right"
-                CornerRadius="5"
-                Grid.Column="2"
-                Margin="0, 0, 30, 0">
-                    <Grid Margin="5" Width="{Binding ActualWidth, ElementName=CompanyInfo}">
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    CornerRadius="5"
+                    Grid.Column="2"
+                    Margin="0, 0, 30, 0">
+                    <Grid Margin="5" MinWidth="200">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -409,16 +414,36 @@
                 </Border>
             </Grid>
 
-            <Button
-                x:Name="ActionsButton"
+            <materialDesign:PopupBox
+                Style="{StaticResource MaterialDesignMultiFloatingActionPopupBox}"
+                Background="{StaticResource SecondaryHueMidBrush}"
+                BorderBrush="{StaticResource SecondaryHueMidBrush}"
+                PlacementMode="TopAndAlignCentres"
                 Grid.Row="1"
-                Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-                Margin="0 0 30 0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
-                Panel.ZIndex="2"
-                Content="{materialDesign:PackIcon Kind=Plus}"
-                Click="ActionsButton_Click" />
+                Margin="0 0 30 0"
+                Panel.ZIndex="2">
+                <StackPanel>
+                    <Button
+                        x:Name="ActionsButton"
+                        ToolTip="Add New Item"
+                        ToolTipService.Placement="Left"
+                        Content="{materialDesign:PackIcon Kind=Plus}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                        Click="ActionsButton_Click">
+                    </Button>
+                    <Button
+                        x:Name="RefreshButton"
+                        ToolTip="Refresh"
+                        ToolTipService.Placement="Left"
+                        Content="{materialDesign:PackIcon Kind=Refresh}"
+                        Margin="0, 5, 0, 0"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                        Click="RefreshButton_Click">
+                    </Button>
+                </StackPanel>
+            </materialDesign:PopupBox>
 
             <ScrollViewer x:Name="Machines" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 0, 0, 0" Visibility="{Binding MachineVisibility}">
                 <ItemsControl x:Name="MachinesItemsControl" ItemsSource="{Binding MachinesToShow}">
@@ -444,8 +469,16 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <ScrollViewer x:Name="Inventory" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding PartsVisibility}" Margin="0, 0, 0, 0">
-                <ItemsControl x:Name="InventoryItemsControl" ItemsSource="{Binding PartsToShow}">
+            <ScrollViewer
+                x:Name="Inventory"
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding PartsVisibility}"
+                Margin="0, 0, 0, 0">
+                <ItemsControl
+                    x:Name="InventoryItemsControl"
+                    ItemsSource="{Binding PartsToShow}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <local:MachineListItem
@@ -460,7 +493,10 @@
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
+                            <WrapPanel
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Stretch"
+                                MouseLeftButtonDown="WrapPanel_MouseLeftButtonDown" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -19,6 +20,8 @@ namespace InventoryAndProjectManagement
         private static MachineListItem currentlyPoppedUpCard = null;
         private static ContentPresenter currentPoppedUpCardCp = null;
         private static bool cardFlipping = false;
+        private static System.Threading.Timer refreshTimer;
+        private static readonly int refreshTime = 5;
 
         public MainWindow()
         {
@@ -245,52 +248,84 @@ namespace InventoryAndProjectManagement
             cardFlipping = false;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void LoadData()
         {
-            // TODO: We need to probably change this to a company production server when we give it to them
-            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            await Task.Run(() =>
             {
-                connection.Open();
-
-                SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
-                SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
-
-                using (SqlDataReader reader = partsCommand.ExecuteReader())
+                // TODO: We need to probably change this to a company production server when we give it to them
+                using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
                 {
-                    while (reader.Read())
+                    connection.Open();
+
+                    SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
+                    SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
+
+                    using (SqlDataReader reader = partsCommand.ExecuteReader())
                     {
-                        var description = reader["part_description"];
-                        string partName = (string)reader["part_name"];
-
-                        Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "No Description" : (string)description, (int)reader["part_qty"]));
-                    }
-                }
-
-                using (SqlDataReader reader = machinesCommand.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var description = reader["machine_description"];
-
-                        Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "No Description" : (string)description, new List<Part>()));
-                    }
-                }
-
-                foreach (Machine machine in Data.Machines)
-                {
-                    SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
-
-                    using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
-                    {
-                        while (partIdsReader.Read())
+                        while (reader.Read())
                         {
-                            Part partToAdd = Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]);
+                            var description = reader["part_description"];
+                            string partName = (string)reader["part_name"];
 
-                            machine.PartList.Add(new Part(partToAdd.Id, partToAdd.Number, partToAdd.Description, (int)(double)partIdsReader["part_amount"]));
+                            if (!Data.Parts.Any(part => part.Id == (int)reader["part_id"]))
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "No Description" : (string)description, (int)reader["part_qty"]));
+                                });
+                            }
+                        }
+                    }
+
+                    using (SqlDataReader reader = machinesCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var description = reader["machine_description"];
+
+                            if (!Data.Machines.Any(machine => machine.Id == (int)reader["machine_id"]))
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "No Description" : (string)description, new List<Part>()));
+                                });
+                            }
+                        }
+                    }
+
+                    foreach (Machine machine in Data.Machines)
+                    {
+                        SqlCommand partIdsCommand = new SqlCommand(string.Format("SELECT sp.part_id, sp.part_amount FROM MACHINES m, STEPS s, STEP_PARTS sp WHERE m.machine_id = {0} and m.machine_id = s.step_id and s.step_id = sp.step_id", machine.Id), connection);
+
+                        using (SqlDataReader partIdsReader = partIdsCommand.ExecuteReader())
+                        {
+                            while (partIdsReader.Read())
+                            {
+                                Part partToAdd = Data.Parts.Single(part => part.Id == (int)partIdsReader["part_id"]);
+
+                                if (!machine.PartList.Any(part => part.Id == partToAdd.Id))
+                                {
+                                    Application.Current.Dispatcher.Invoke(delegate
+                                    {
+                                        machine.PartList.Add(new Part(partToAdd.Id, partToAdd.Number, partToAdd.Description, (int)(double)partIdsReader["part_amount"]));
+                                    });
+                                }
+                            }
                         }
                     }
                 }
-            }
+            });
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // This triggers once right away for the initial data load
+            // then retriggers every refreshTime minutes
+            refreshTimer = new System.Threading.Timer((ev) =>
+            {
+                // Auto Refresh
+                LoadData();
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(refreshTime));
 
             Data.PageNum = 1;
             Data.Machines.CollectionChanged += PartsOrMachinesCollectionChanged;
@@ -662,6 +697,11 @@ namespace InventoryAndProjectManagement
         private void ResetValueIfEmpty(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox && textBox.Text == "") textBox.Text = "0";
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadData();
         }
     }
 }

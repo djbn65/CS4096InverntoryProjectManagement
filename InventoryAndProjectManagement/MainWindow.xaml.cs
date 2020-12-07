@@ -262,6 +262,7 @@ namespace InventoryAndProjectManagement
             await Task.Run(() =>
             {
                 // TODO: We need to probably change this to a company production server when we give it to them
+                Console.WriteLine(Settings.GetConnection());
                 using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                 {
                     connection.Open();
@@ -357,7 +358,7 @@ namespace InventoryAndProjectManagement
         {
             // This triggers once right away for the initial data load
             // then retriggers every refreshTime minutes
-            refreshTimer = new System.Threading.Timer((ev) =>
+            refreshTimer = new Timer((ev) =>
             {
                 // Auto Refresh
                 LoadData();
@@ -385,7 +386,7 @@ namespace InventoryAndProjectManagement
 
                 if ((bool)await PopUpDialog.ShowDialog(FindResource("ConfirmContent")))
                 {
-                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                     {
                         try
                         {
@@ -467,7 +468,7 @@ namespace InventoryAndProjectManagement
             {
                 if (Data.MachineVisibility == Visibility.Visible)
                 {
-                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                     {
                         try
                         {
@@ -488,7 +489,7 @@ namespace InventoryAndProjectManagement
                 }
                 else if (Data.PartsVisibility == Visibility.Visible)
                 {
-                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                     {
                         try
                         {
@@ -515,7 +516,7 @@ namespace InventoryAndProjectManagement
                 }
                 else
                 {
-                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                     {
                         try
                         {
@@ -539,7 +540,7 @@ namespace InventoryAndProjectManagement
 
         private void CreateMachine_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
             {
                 try
                 {
@@ -659,7 +660,7 @@ namespace InventoryAndProjectManagement
 
         private void CreatePart_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
             {
                 try
                 {
@@ -788,7 +789,7 @@ namespace InventoryAndProjectManagement
 
         private void CreateProject_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
             {
                 try
                 {
@@ -823,6 +824,11 @@ namespace InventoryAndProjectManagement
                     // Handle other exception
                 }
             }
+
+            Data.AddNameText = Data.AddDescriptionText = "";
+
+            Data.IsDialogOpen = false;
+            End_Click(null, null);
         }
     }
 }

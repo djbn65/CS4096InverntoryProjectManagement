@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media.Animation;
 using GalaSoft.MvvmLight.Command;
 using MaterialDesignThemes.Wpf;
@@ -28,26 +29,30 @@ namespace InventoryAndProjectManagement
             InitializeComponent();
         }
 
-        public void SwitchTabs()
+        public void SwitchTabs(string aContent)
         {
             PageValue.TextChanged -= PageValue_TextChanged;
-            Data.SwitchTabs();
+            Data.SwitchTabs(aContent);
             PageValue.TextChanged += PageValue_TextChanged;
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (Machines != null)
+            if (sender is RadioButton rb)
             {
-                if (currentlyPoppedUpCard != null)
+                if (Machines != null)
                 {
-                    cardFlipping = true;
-                    Back(currentlyPoppedUpCard);
-                }
+                    if (currentlyPoppedUpCard != null)
+                    {
+                        cardFlipping = true;
+                        Back(currentlyPoppedUpCard);
+                    }
 
-                Data.MachineVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
-                Data.PartsVisibility = Data.MachineVisibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
-                SwitchTabs();
+                    if (rb.Content is string content)
+                    {
+                        SwitchTabs(content);
+                    }
+                }
             }
         }
 
@@ -58,14 +63,16 @@ namespace InventoryAndProjectManagement
                 if (currentlyPoppedUpCard == null && !cardFlipping)
                 {
                     if (Data.MachineVisibility == Visibility.Visible) currentPoppedUpCardCp = MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
-                    else currentPoppedUpCardCp = InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+                    else if (Data.PartsVisibility == Visibility.Visible) currentPoppedUpCardCp = InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
+                    else currentPoppedUpCardCp = ProjectsItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter;
 
                     currentlyPoppedUpCard = item;
                     cardFlipping = true;
                     PopUpCard(item);
                 }
                 else if ((Data.MachineVisibility == Visibility.Visible && currentPoppedUpCardCp == MachinesItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter && !cardFlipping) ||
-                          currentPoppedUpCardCp == InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter)
+                         (Data.PartsVisibility == Visibility.Visible && currentPoppedUpCardCp == InventoryItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter && !cardFlipping) ||
+                         (Data.ProjectsVisibility == Visibility.Visible && currentPoppedUpCardCp == ProjectsItemsControl.ItemContainerGenerator.ContainerFromItem(item.DataContext) as ContentPresenter && !cardFlipping))
                 {
                     cardFlipping = true;
                     Back(item);
@@ -172,7 +179,8 @@ namespace InventoryAndProjectManagement
             Point cardPosition;
 
             if (Data.MachineVisibility == Visibility.Visible) cardPosition = card.TransformToAncestor(Machines).Transform(new Point(0, 0));
-            else cardPosition = card.TransformToAncestor(Inventory).Transform(new Point(0, 0));
+            else if (Data.PartsVisibility == Visibility.Visible) cardPosition = card.TransformToAncestor(Inventory).Transform(new Point(0, 0));
+            else cardPosition = card.TransformToAncestor(Projects).Transform(new Point(0, 0));
 
             DoubleAnimation translateYAnimation = new DoubleAnimation(0, Inventory.ActualHeight / 2 - cardPosition.Y - card.ActualHeight / 2, TimeSpan.FromMilliseconds(300)),
                             tranlsateXAnimation = new DoubleAnimation(0, Inventory.ActualWidth / 2 - cardPosition.X - card.ActualWidth / 2, TimeSpan.FromMilliseconds(300));
@@ -259,6 +267,7 @@ namespace InventoryAndProjectManagement
 
                     SqlCommand partsCommand = new SqlCommand("SELECT * FROM [PARTS]", connection);
                     SqlCommand machinesCommand = new SqlCommand("SELECT * FROM [MACHINES]", connection);
+                    SqlCommand projectsCommand = new SqlCommand("SELECT * FROM [PROJECTS]", connection);
 
                     using (SqlDataReader reader = partsCommand.ExecuteReader())
                     {
@@ -313,6 +322,32 @@ namespace InventoryAndProjectManagement
                             }
                         }
                     }
+
+                    using (SqlDataReader reader = projectsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var description = reader["project_description"];
+                            var complete = (string)reader["complete"];
+
+                            if (!Data.Projects.Any(project => project.Id == (int)reader["project_id"]))
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Projects.Add(
+                                        new Project(
+                                            (int)reader["project_id"],
+                                            (string)reader["project_name"],
+                                            (description is DBNull) ? "No Description" : (string)description,
+                                            (int)reader["current_step"],
+                                            complete != "F",
+                                            Data.Machines.Single(machine => machine.Id == (int)reader["machine_id"])
+                                        )
+                                    );
+                                });
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -330,6 +365,7 @@ namespace InventoryAndProjectManagement
             Data.PageNum = 1;
             Data.Machines.CollectionChanged += PartsOrMachinesCollectionChanged;
             Data.Parts.CollectionChanged += PartsOrMachinesCollectionChanged;
+            Data.Projects.CollectionChanged += PartsOrMachinesCollectionChanged;
             Data.InfoClickCommand = new RelayCommand<MachineListItem>(PopUpCardInfoClick);
             Data.BackSideItemDeleteCommand = new RelayCommand<int>(BackSideItemDelete);
             Data.DeleteMachineCommand = new RelayCommand<object>(DeleteMachineDialogPopUp);
@@ -449,7 +485,7 @@ namespace InventoryAndProjectManagement
                         }
                     }
                 }
-                else
+                else if (Data.PartsVisibility == Visibility.Visible)
                 {
                     using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
                     {
@@ -468,6 +504,27 @@ namespace InventoryAndProjectManagement
                                 {
                                     machine.PartList.Remove(machine.PartList.Single(part => part.Id == Data.MachineOrPartIdToDelete));
                                 }
+                            }
+                        }
+                        catch
+                        {
+                            // Handle exception
+                        }
+                    }
+                }
+                else
+                {
+                    using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+                    {
+                        try
+                        {
+                            connection.Open();
+
+                            SqlCommand deletePartCommand = new SqlCommand(string.Format("DELETE FROM PROJECTS WHERE project_id = {0}", Data.MachineOrPartIdToDelete), connection);
+
+                            if (deletePartCommand.ExecuteNonQuery() == 1)
+                            {
+                                Data.Projects.Remove(Data.Projects.Single(project => project.Id == Data.MachineOrPartIdToDelete));
                             }
                         }
                         catch
@@ -570,9 +627,13 @@ namespace InventoryAndProjectManagement
             {
                 dialogContent = FindResource("AddMachineContent");
             }
-            else
+            else if (Data.PartsVisibility == Visibility.Visible)
             {
                 dialogContent = FindResource("AddPartContent");
+            }
+            else
+            {
+                dialogContent = FindResource("AddProjectContent");
             }
             PopUpDialog.ShowDialog(dialogContent);
         }
@@ -702,6 +763,65 @@ namespace InventoryAndProjectManagement
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             LoadData();
+        }
+
+        private void ProjectTemplateChecked(object sender, RoutedEventArgs e)
+        {
+            BindingExpression be = ((CheckBox)((DataGridCell)sender).Content).GetBindingExpression(CheckBox.IsCheckedProperty);
+
+            foreach (Machine machine in Data.Machines)
+            {
+                if (machine != ((Machine)be.DataItem))
+                {
+                    machine.IsSelected = false;
+                }
+            }
+
+            Data.UpdateCreateProjectEnabled();
+        }
+
+        private void ProjectTemplateUnchecked(object sender, RoutedEventArgs e)
+        {
+            Data.UpdateCreateProjectEnabled();
+        }
+
+        private void CreateProject_Click(object sender, RoutedEventArgs e)
+        {
+            using (SqlConnection connection = new SqlConnection("Server=grovertest.cbwbkynnwz1t.us-east-2.rds.amazonaws.com,1433;Database=groverdata;User Id=admin;Password=groverpassword;"))
+            {
+                try
+                {
+                    connection.Open();
+
+                    SqlCommand addProjectCommand =
+                        new SqlCommand(
+                            string.Format(
+                                "INSERT INTO PROJECTS (machine_id, project_name, project_description, current_step, complete)" +
+                                " VALUES ({0}, '{1}', '{2}', 1, 'F'); SELECT SCOPE_IDENTITY();",
+                                Data.Machines.Single(machine => machine.IsSelected).Id, Data.AddNameText, Data.AddDescriptionText
+                            ),
+                            connection
+                    );
+
+                    if (int.TryParse(addProjectCommand.ExecuteScalar().ToString(), out int newId))
+                    {
+                        Data.Projects.Add(new Project(newId, Data.AddNameText, Data.AddDescriptionText, 1, false, Data.Machines.Single(machine => machine.IsSelected)));
+                    }
+                }
+                catch (SqlException exception)
+                {
+                    // Handle specific sql exception numbers
+                    switch (exception.Number)
+                    {
+                        default:
+                            break;
+                    }
+                }
+                catch
+                {
+                    // Handle other exception
+                }
+            }
         }
     }
 }

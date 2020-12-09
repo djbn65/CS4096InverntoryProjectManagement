@@ -146,6 +146,18 @@ namespace InventoryAndProjectManagement
             }
         }
 
+        private ICommand _finishProjectCommand;
+
+        public ICommand FinishProjectCommand
+        {
+            get => _finishProjectCommand;
+            set
+            {
+                _finishProjectCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public string SearchText
         {
             get => PartsVisibility == Visibility.Visible ? _inventorySearchText : (MachineVisibility == Visibility.Visible ? _machinesSearchText : _projectSearchText);
@@ -368,6 +380,7 @@ namespace InventoryAndProjectManagement
             {
                 _projects = value;
                 NotifyPropertyChanged();
+                Refresh();
             }
         }
 

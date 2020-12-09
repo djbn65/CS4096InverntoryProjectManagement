@@ -27,6 +27,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <local:NullableIntToString x:Key="NullableIntToStringConverter" />
+            <local:BooleanToInverseBooleanConverter x:Key="InverseBoolConverter" />
 
             <Style x:Key="ToolTipStyle" TargetType="{x:Type ToolTip}">
                 <Setter Property="OverridesDefaultStyle" Value="true" />
@@ -567,7 +568,10 @@
                                 DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}"
                                 InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
                                 DeleteBacksideItemCommand="{Binding ElementName=Data, Path=BackSideItemDeleteCommand}"
-                                Margin="20" />
+                                CompleteCommand="{Binding ElementName=Data, Path=FinishProjectCommand}"
+                                Margin="20"
+                                IsProject="True"
+                                IsEnabled="{Binding IsComplete, Converter={StaticResource InverseBoolConverter}}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 

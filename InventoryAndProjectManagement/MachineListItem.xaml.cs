@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using GalaSoft.MvvmLight.Command;
+using System.Linq;
+using System.Data.SqlClient;
 
 namespace InventoryAndProjectManagement
 {
@@ -86,6 +88,100 @@ namespace InventoryAndProjectManagement
 
         public static readonly DependencyProperty DeleteBacksideItemCommandProperty = DependencyProperty.Register("DeleteBacksideItemCommand", typeof(ICommand), typeof(MachineListItem));
 
+        public ICommand CompleteCommand
+        {
+            get => (ICommand)GetValue(CompleteCommandProperty);
+            set
+            {
+                SetValue(CompleteCommandProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty CompleteCommandProperty = DependencyProperty.Register("CompleteCommand", typeof(ICommand), typeof(MachineListItem));
+
+        public ICommand AllocateCommand
+        {
+            get => new RelayCommand<int>(Allocate);
+        }
+
+        private void Allocate(int partIdToAllocate)
+        {
+            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
+            {
+                connection.Open();
+
+                if (BackSideItems is ObservableCollection<Part> partList)
+                {
+                    SqlCommand allocationStatusCommand =
+                        new SqlCommand(string.Format(
+                            "SELECT COUNT(*) as count " +
+                            "FROM ALLOCATION " +
+                            "WHERE part_id={0} and project_id={1}",
+                            partIdToAllocate, Id),
+                            connection
+                        );
+
+                    bool doUpdate = false;
+
+                    using (SqlDataReader reader = allocationStatusCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            bool dataBaseAllocationValue = (int)reader["count"] == 1;
+
+                            if (partList.Single(part => part.Id == partIdToAllocate).IsAllocated == dataBaseAllocationValue)
+                            {
+                                doUpdate = true;
+                                partList.Single(part => part.Id == partIdToAllocate).IsAllocated = !partList.Single(part => part.Id == partIdToAllocate).IsAllocated;
+                            }
+                            else
+                            {
+                                partList.Single(part => part.Id == partIdToAllocate).IsAllocated = dataBaseAllocationValue;
+                            }
+                        }
+                        else
+                        {
+                            // Error because no count was returned
+                        }
+                    }
+
+                    if (doUpdate)
+                    {
+                        SqlCommand allocationChangeCommand;
+                        if (partList.Single(part => part.Id == partIdToAllocate).IsAllocated)
+                        {
+                            // Do Insert
+                            allocationChangeCommand =
+                                new SqlCommand(string.Format(
+                                    "INSERT INTO ALLOCATION (part_id, project_id) VALUES({0}, {1})",
+                                    partIdToAllocate, Id),
+                                    connection
+                                );
+                        }
+                        else
+                        {
+                            // Do Delete
+                            allocationChangeCommand =
+                                new SqlCommand(string.Format(
+                                    "DELETE FROM ALLOCATION WHERE part_id = {0} and project_id = {1}",
+                                    partIdToAllocate, Id),
+                                    connection
+                                );
+                        }
+
+                        if (allocationChangeCommand.ExecuteNonQuery() != 1)
+                        {
+                            // Need to revert since it already changed above
+                            partList.Single(part => part.Id == partIdToAllocate).IsAllocated = !partList.Single(part => part.Id == partIdToAllocate).IsAllocated;
+
+                            // Handle Error
+                        }
+                    }
+                }
+            }
+        }
+
         public int Id
         {
             get => (int)GetValue(IdProperty);
@@ -151,6 +247,8 @@ namespace InventoryAndProjectManagement
 
         public bool IsFlipped { get; set; } = false;
 
+        public bool IsProject { get; set; } = false;
+
         public MachineListItem()
         {
             InitializeComponent();
@@ -183,6 +281,12 @@ namespace InventoryAndProjectManagement
         {
             if (BackSideItems is ObservableCollection<Part>) DeleteData = new Machine(Id, Description, Title);
             else DeleteData = new Part(Id, Title, Description, 0);
+        }
+
+        private void Finished_Click(object sender, RoutedEventArgs e)
+        {
+            IsEnabled = !IsEnabled;
+            (sender as Button).Command.Execute((sender as Button).CommandParameter);
         }
     }
 }

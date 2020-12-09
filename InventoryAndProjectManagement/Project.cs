@@ -19,7 +19,15 @@ namespace InventoryAndProjectManagement
             Step = aStep;
             IsComplete = aIsComplete;
 
-            MachineData = new Machine(aMachineData.Id, aMachineData.Name, aMachineData.Description, aMachineData?.PartList.ToList());
+            if (aMachineData != null)
+            {
+                MachineData = new Machine(aMachineData.Id, aMachineData.Name, aMachineData.Description, new System.Collections.Generic.List<Part>());
+
+                foreach (Part part in aMachineData.PartList)
+                {
+                    MachineData.PartList.Add(new Part(part.Id, part.Number, part.Description, part.Quantity));
+                }
+            }
         }
     }
 }

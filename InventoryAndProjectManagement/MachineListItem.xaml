@@ -20,6 +20,9 @@
         <local:TitleToAbbrConverter x:Key="MachTitleToAbbrConverter" />
         <local:ImgPathToImgVisibilityConverter x:Key="ImgPathVisibilityConverter" />
         <local:BackSideItemsConverter x:Key="BackSideItemsConverter" />
+        <local:AllocatedContentConverter x:Key="AllocatedContentConverter" />
+        <local:AllocatedButtonColorConverter x:Key="AllocatedButtonColorConverter" />
+        <local:BooleanToOpacityConverter x:Key="EnabledToOpacityConverter" />
 
         <Style TargetType="{x:Type ToolTip}">
             <Setter Property="OverridesDefaultStyle" Value="true" />
@@ -70,7 +73,7 @@
         </TransformGroup>
     </UserControl.RenderTransform>
 
-    <materialDesign:Card UniformCornerRadius="5" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+    <materialDesign:Card UniformCornerRadius="5" materialDesign:ShadowAssist.ShadowDepth="Depth2" Opacity="{Binding ElementName=MachineItem, Path=IsEnabled, Converter={StaticResource EnabledToOpacityConverter}}">
         <Grid
         RenderTransformOrigin="0.5, 0.5">
             <Grid>
@@ -120,11 +123,15 @@
                                 Grid.Column="1"
                                 HorizontalAlignment="Right">
                                 <Button
+                                    x:Name="Finished"
                                     Content="{materialDesign:PackIcon Kind=CheckBold, Size=25}"
                                     Foreground="{StaticResource SecondaryHueMidBrush}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
                                     ToolTip="Finished"
-                                    Visibility="{Binding ElementName=MachineItem, Path=IsCheckButtonEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    Visibility="{Binding ElementName=MachineItem, Path=IsCheckButtonEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Click="Finished_Click"
+                                    Command="{Binding ElementName=MachineItem, Path=CompleteCommand}"
+                                    CommandParameter="{Binding Id}" />
                                 <Button
                                     Content="{materialDesign:PackIcon Kind=InformationCircleOutline}"
                                     Foreground="{StaticResource SecondaryHueMidBrush}"
@@ -178,7 +185,16 @@
                                                         <TextBlock Text="{Binding Quantity}" />
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal">
+                                                <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding ElementName=MachineItem, Path=IsProject, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Button
+                                                        x:Name="AllocateButton"
+                                                        Content="{Binding IsAllocated, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource AllocatedContentConverter}}"
+                                                        FontSize="16"
+                                                        Style="{Binding IsAllocated, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource AllocatedButtonColorConverter}}"
+                                                        Command="{Binding ElementName=MachineItem, Path=AllocateCommand}"
+                                                        CommandParameter="{Binding Id}" />
+                                                </StackPanel>
+                                                <StackPanel Margin="10, 0, 0, 0" Grid.Column="1" Orientation="Horizontal" Visibility="{Binding ElementName=MachineItem, Path=IsProject, Converter={StaticResource InverseBoolToVisConverter}}">
                                                     <Button
                                                         Content="{materialDesign:PackIcon Kind=Pencil}"
                                                         Style="{StaticResource MaterialDesignFlatAccentBgButton}"

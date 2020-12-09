@@ -83,7 +83,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AllocatedButtonColorConverter.cs" />
+    <Compile Include="AllocatedContentConverter.cs" />
     <Compile Include="BackSideItemsConverter.cs" />
+    <Compile Include="BooleanToInverseBooleanConverter.cs" />
+    <Compile Include="BooleanToOpacityConverter.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ImgPathToImgVisibilityConverter.cs" />
     <Compile Include="Machine.cs" />

@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using GalaSoft.MvvmLight.Command;
 using MaterialDesignThemes.Wpf;
 using System.Threading;
+using System.Collections.ObjectModel;
 
 namespace InventoryAndProjectManagement
 {
@@ -262,7 +263,6 @@ namespace InventoryAndProjectManagement
             await Task.Run(() =>
             {
                 // TODO: We need to probably change this to a company production server when we give it to them
-                Console.WriteLine(Settings.GetConnection());
                 using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                 {
                     connection.Open();
@@ -348,6 +348,45 @@ namespace InventoryAndProjectManagement
                                     );
                                 });
                             }
+                            else
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Projects.Remove(Data.Projects.Single(project => project.Id == (int)reader["project_id"]));
+
+                                    Data.Projects.Add(
+                                        new Project(
+                                            (int)reader["project_id"],
+                                            (string)reader["project_name"],
+                                            (description is DBNull) ? "No Description" : (string)description,
+                                            (int)reader["current_step"],
+                                            complete != "F",
+                                            Data.Machines.Single(machine => machine.Id == (int)reader["machine_id"])
+                                        )
+                                    );
+                                });
+                            }
+                        }
+                        Data.Projects = new ObservableCollection<Project>(Data.Projects.OrderBy(project => project.IsComplete));
+                    }
+
+                    foreach (Project project in Data.Projects)
+                    {
+                        SqlCommand allocationStatusCommand =
+                            new SqlCommand(string.Format(
+                                "SELECT part_id " +
+                                "FROM ALLOCATION " +
+                                "WHERE project_id={0}",
+                                project.Id),
+                                connection
+                            );
+
+                        using (SqlDataReader reader = allocationStatusCommand.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                project.MachineData.PartList.Single(part => part.Id == (int)reader["part_id"]).IsAllocated = true;
+                            }
                         }
                     }
                 }
@@ -371,6 +410,34 @@ namespace InventoryAndProjectManagement
             Data.InfoClickCommand = new RelayCommand<MachineListItem>(PopUpCardInfoClick);
             Data.BackSideItemDeleteCommand = new RelayCommand<int>(BackSideItemDelete);
             Data.DeleteMachineCommand = new RelayCommand<object>(DeleteMachineDialogPopUp);
+            Data.FinishProjectCommand = new RelayCommand<int>(FinishProjectCommand);
+        }
+
+        private void FinishProjectCommand(int aProjectId)
+        {
+            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
+            {
+                connection.Open();
+
+                SqlCommand finishProjectCommand =
+                    new SqlCommand(string.Format(
+                        "UPDATE PROJECTS " +
+                        "SET complete = 'T' " +
+                        "WHERE project_id = {0} ",
+                        aProjectId),
+                        connection
+                    );
+
+                if (finishProjectCommand.ExecuteNonQuery() == 1)
+                {
+                    Data.Projects.Single(project => project.Id == aProjectId).IsComplete = true;
+                }
+                else
+                {
+                    // Handle Error
+                }
+            }
+            Data.Projects = new ObservableCollection<Project>(Data.Projects.OrderBy(project => project.IsComplete));
         }
 
         private void PartsOrMachinesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

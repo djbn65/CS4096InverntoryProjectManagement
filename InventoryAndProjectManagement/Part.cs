@@ -37,6 +37,19 @@ namespace InventoryAndProjectManagement
             }
         }
 
+        private bool _isAllocated = false;
+
+        public bool IsAllocated
+        {
+            get => _isAllocated;
+            set
+            {
+                _isAllocated = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
         public Part(int aId, string aNumber, string aDescr, int aQty)
         {
             Id = aId;

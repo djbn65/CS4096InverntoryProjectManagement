@@ -262,6 +262,9 @@ namespace InventoryAndProjectManagement
         {
             await Task.Run(() =>
             {
+                Data.Machines.CollectionChanged -= PartsOrMachinesCollectionChanged;
+                Data.Parts.CollectionChanged -= PartsOrMachinesCollectionChanged;
+                Data.Projects.CollectionChanged -= PartsOrMachinesCollectionChanged;
                 // TODO: We need to probably change this to a company production server when we give it to them
                 using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                 {
@@ -285,6 +288,15 @@ namespace InventoryAndProjectManagement
                                     Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "No Description" : (string)description, (int)reader["part_qty"]));
                                 });
                             }
+                            else
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Parts.Remove(Data.Parts.Single(part => part.Id == (int)reader["part_id"]));
+
+                                    Data.Parts.Add(new Part((int)reader["part_id"], partName == "BLANK" ? "No Part #" : partName, (description is DBNull) ? "No Description" : (string)description, (int)reader["part_qty"]));
+                                });
+                            }
                         }
                     }
 
@@ -298,6 +310,15 @@ namespace InventoryAndProjectManagement
                             {
                                 Application.Current.Dispatcher.Invoke(delegate
                                 {
+                                    Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "No Description" : (string)description, new List<Part>()));
+                                });
+                            }
+                            else
+                            {
+                                Application.Current.Dispatcher.Invoke(delegate
+                                {
+                                    Data.Machines.Remove(Data.Machines.Single(machine => machine.Id == (int)reader["machine_id"]));
+
                                     Data.Machines.Add(new Machine((int)reader["machine_id"], (string)reader["machine_name"], (description is DBNull) ? "No Description" : (string)description, new List<Part>()));
                                 });
                             }
@@ -318,6 +339,15 @@ namespace InventoryAndProjectManagement
                                 {
                                     Application.Current.Dispatcher.Invoke(delegate
                                     {
+                                        machine.PartList.Add(new Part(partToAdd.Id, partToAdd.Number, partToAdd.Description, (int)(double)partIdsReader["part_amount"]));
+                                    });
+                                }
+                                else
+                                {
+                                    Application.Current.Dispatcher.Invoke(delegate
+                                    {
+                                        machine.PartList.Remove(machine.PartList.Single(part => part.Id == (int)partIdsReader["pard_id"]));
+
                                         machine.PartList.Add(new Part(partToAdd.Id, partToAdd.Number, partToAdd.Description, (int)(double)partIdsReader["part_amount"]));
                                     });
                                 }
@@ -390,6 +420,11 @@ namespace InventoryAndProjectManagement
                         }
                     }
                 }
+
+                Data.Machines.CollectionChanged += PartsOrMachinesCollectionChanged;
+                Data.Parts.CollectionChanged += PartsOrMachinesCollectionChanged;
+                Data.Projects.CollectionChanged += PartsOrMachinesCollectionChanged;
+                Data.Refresh();
             });
         }
 
@@ -411,6 +446,112 @@ namespace InventoryAndProjectManagement
             Data.BackSideItemDeleteCommand = new RelayCommand<int>(BackSideItemDelete);
             Data.DeleteMachineCommand = new RelayCommand<object>(DeleteMachineDialogPopUp);
             Data.FinishProjectCommand = new RelayCommand<int>(FinishProjectCommand);
+            Data.AllocatePartCommand = new RelayCommand<object>(AllocatePartCommand);
+            Data.CloseCardCommand = new RelayCommand(CloseCardCommand);
+        }
+
+        private void CloseCardCommand()
+        {
+            Back(currentlyPoppedUpCard);
+        }
+
+        private void AllocatePartCommand(object data)
+        {
+            if (data is int)
+            {
+                return;
+            }
+
+            if (data is Tuple<int, int, int, bool> tupleData)
+            {
+                int projectId = tupleData.Item1;
+                int partId = tupleData.Item2;
+                int quantity = tupleData.Item3;
+                bool isAllocating = tupleData.Item4;
+
+                using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
+                {
+                    connection.Open();
+
+                    SqlCommand partSyncCommand
+                        = new SqlCommand(string.Format(
+                            "SELECT * " +
+                            "FROM PARTS " +
+                            "WHERE part_id = {0}",
+                            partId),
+                            connection
+                        );
+
+                    bool inventoryOk = true;
+
+                    using (SqlDataReader reader = partSyncCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Data.Parts.Single(part => part.Id == (int)reader["part_id"]).Quantity = (int)reader["part_qty"];
+
+                            if (isAllocating && (int)reader["part_qty"] < quantity)
+                            {
+                                inventoryOk = false;
+
+                                Data.NotEnoughPartsText
+                                    = string.Format(
+                                        "Not enough parts! You only have {0} {1}!",
+                                        (int)reader["part_qty"],
+                                        Data.Parts.Single(part => part.Id == (int)reader["part_id"]).Description
+                                    );
+
+                                PopUpDialog.ShowDialog(FindResource("NotEnoughPartsContent"));
+                            }
+                        }
+                    }
+
+                    if (!inventoryOk)
+                    {
+                        // Revert the allocation
+                        Data.Projects.Single(project => project.Id == projectId).MachineData.PartList.Single(part => part.Id == partId).IsAllocated = false;
+
+                        SqlCommand allocationChangeCommand = new SqlCommand(string.Format(
+                            "DELETE FROM ALLOCATION WHERE part_id = {0} and project_id = {1}",
+                            partId, projectId),
+                            connection
+                        );
+
+                        allocationChangeCommand.ExecuteNonQuery();
+                        return;
+                    }
+
+                    // Subtract from or add to current inventory
+                    if (isAllocating)
+                    {
+                        SqlCommand subtractPartCommand
+                            = new SqlCommand(string.Format(
+                                "UPDATE PARTS " +
+                                "SET part_qty = {0} " +
+                                "WHERE part_id = {1} ",
+                                Data.Parts.Single(part => part.Id == partId).Quantity - quantity,
+                                partId),
+                                connection
+                            );
+
+                        subtractPartCommand.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        SqlCommand subtractPartCommand
+                            = new SqlCommand(string.Format(
+                                "UPDATE PARTS " +
+                                "SET part_qty = {0} " +
+                                "WHERE part_id = {1} ",
+                                Data.Parts.Single(part => part.Id == partId).Quantity + quantity,
+                                partId),
+                                connection
+                            );
+
+                        subtractPartCommand.ExecuteNonQuery();
+                    }
+                }
+            }
         }
 
         private void FinishProjectCommand(int aProjectId)

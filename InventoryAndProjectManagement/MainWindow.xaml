@@ -445,6 +445,34 @@
                     </Button>
                 </StackPanel>
             </StackPanel>
+
+            <StackPanel x:Key="NotEnoughPartsContent" Margin="16">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="MaxWidth" Value="{Binding ElementName=TheWindow, Path=ActualWidth}" />
+                    </Style>
+                </StackPanel.Style>
+
+                <TextBlock
+                    FontSize="18"
+                    TextWrapping="Wrap"
+                    TextAlignment="Center"
+                    Text="{Binding NotEnoughPartsText}" />
+                <StackPanel
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Margin="0 8 8 0"
+                        Content="CLOSE"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                        <Button.CommandParameter>
+                            <system:Boolean>False</system:Boolean>
+                        </Button.CommandParameter>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -569,6 +597,8 @@
                                 InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
                                 DeleteBacksideItemCommand="{Binding ElementName=Data, Path=BackSideItemDeleteCommand}"
                                 CompleteCommand="{Binding ElementName=Data, Path=FinishProjectCommand}"
+                                AllocateCommand="{Binding ElementName=Data, Path=AllocatePartCommand}"
+                                CloseCardCommand="{Binding ElementName=Data, Path=CloseCardCommand}"
                                 Margin="20"
                                 IsProject="True"
                                 IsEnabled="{Binding IsComplete, Converter={StaticResource InverseBoolConverter}}" />
@@ -595,6 +625,7 @@
                                 DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}"
                                 InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
                                 DeleteBacksideItemCommand="{Binding ElementName=Data, Path=BackSideItemDeleteCommand}"
+                                CloseCardCommand="{Binding ElementName=Data, Path=CloseCardCommand}"
                                 Margin="20" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -625,7 +656,9 @@
                                 Id="{Binding Id}"
                                 DeleteCommand="{Binding ElementName=Data, Path=DeleteMachineCommand}"
                                 InfoCommand="{Binding ElementName=Data, Path=InfoClickCommand}"
-                                Margin="20" />
+                                CloseCardCommand="{Binding ElementName=Data, Path=CloseCardCommand}"
+                                Margin="20"
+                                Quantity="{Binding Quantity}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 

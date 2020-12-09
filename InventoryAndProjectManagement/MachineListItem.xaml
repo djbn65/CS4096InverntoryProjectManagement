@@ -23,6 +23,7 @@
         <local:AllocatedContentConverter x:Key="AllocatedContentConverter" />
         <local:AllocatedButtonColorConverter x:Key="AllocatedButtonColorConverter" />
         <local:BooleanToOpacityConverter x:Key="EnabledToOpacityConverter" />
+        <local:QuantityToVisibilityConverter x:Key="QuantityToVisConverter" />
 
         <Style TargetType="{x:Type ToolTip}">
             <Setter Property="OverridesDefaultStyle" Value="true" />
@@ -83,13 +84,27 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <materialDesign:ColorZone Mode="PrimaryMid" Panel.ZIndex="0" VerticalAlignment="Stretch">
+                    <materialDesign:ColorZone Mode="PrimaryMid" Panel.ZIndex="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <Viewbox>
                             <TextBlock
                                 Text="{Binding Title, ElementName=MachineItem, Converter={StaticResource MachTitleToAbbrConverter}}"
                                 Foreground="{StaticResource MaterialDesignDarkForeground}" />
                         </Viewbox>
                     </materialDesign:ColorZone>
+                    <Button
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="10"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                        Foreground="{StaticResource PrimaryHueDarkBrush}"
+                        FontWeight="Bold"
+                        Cursor="Arrow"
+                        Visibility="{Binding ElementName=MachineItem, Path=Quantity, Converter={StaticResource QuantityToVisConverter}}"
+                        Content="{Binding ElementName=MachineItem, Path=Quantity}">
+                        <Button.Background>
+                            <SolidColorBrush Opacity="0.5" Color="White" />
+                        </Button.Background>
+                    </Button>
                     <StackPanel
                         Grid.Row="1"
                         Margin="10, 20, 10, 10">
@@ -191,6 +206,7 @@
                                                         Content="{Binding IsAllocated, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource AllocatedContentConverter}}"
                                                         FontSize="16"
                                                         Style="{Binding IsAllocated, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource AllocatedButtonColorConverter}}"
+                                                        Click="AllocateButton_Click"
                                                         Command="{Binding ElementName=MachineItem, Path=AllocateCommand}"
                                                         CommandParameter="{Binding Id}" />
                                                 </StackPanel>
@@ -220,9 +236,15 @@
                                 </ListView.ItemContainerStyle>
                             </ListView>
                         </materialDesign:Card>
-                        <Button Height="40" Grid.Row="2" HorizontalAlignment="Center" Padding="25, 5">
+                        <Button
+                            Height="40"
+                            Grid.Row="2"
+                            HorizontalAlignment="Center"
+                            Padding="25, 5"
+                            Command="{Binding ElementName=MachineItem, Path=CloseCardCommand}"
+                            Visibility="Collapsed">
                             <Viewbox>
-                                <TextBlock>Action</TextBlock>
+                                <TextBlock>Close</TextBlock>
                             </Viewbox>
                         </Button>
                     </Grid>

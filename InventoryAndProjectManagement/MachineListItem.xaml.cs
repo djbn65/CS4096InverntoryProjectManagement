@@ -50,6 +50,18 @@ namespace InventoryAndProjectManagement
 
         public static readonly DependencyProperty BackSideItemsProperty = DependencyProperty.Register("BackSideItems", typeof(object), typeof(MachineListItem), new PropertyMetadata(new object()));
 
+        public int Quantity
+        {
+            get => (int)GetValue(QuantityProperty);
+            set
+            {
+                SetValue(QuantityProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty QuantityProperty = DependencyProperty.Register("Quantity", typeof(int), typeof(MachineListItem), new PropertyMetadata(-1));
+
         public ICommand DeleteCommand
         {
             get => (ICommand)GetValue(DeleteCommandProperty);
@@ -100,87 +112,114 @@ namespace InventoryAndProjectManagement
 
         public static readonly DependencyProperty CompleteCommandProperty = DependencyProperty.Register("CompleteCommand", typeof(ICommand), typeof(MachineListItem));
 
-        public ICommand AllocateCommand
+        public ICommand CloseCardCommand
         {
-            get => new RelayCommand<int>(Allocate);
+            get => (ICommand)GetValue(CloseCardCommandProperty);
+            set
+            {
+                SetValue(CloseCardCommandProperty, value);
+                NotifyPropertyChanged();
+            }
         }
 
-        private void Allocate(int partIdToAllocate)
-        {
-            using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
-            {
-                connection.Open();
+        public static readonly DependencyProperty CloseCardCommandProperty = DependencyProperty.Register("CloseCardCommand", typeof(ICommand), typeof(MachineListItem));
 
+        private void AllocateButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button allocateButton)
+            {
                 if (BackSideItems is ObservableCollection<Part> partList)
                 {
-                    SqlCommand allocationStatusCommand =
-                        new SqlCommand(string.Format(
-                            "SELECT COUNT(*) as count " +
-                            "FROM ALLOCATION " +
-                            "WHERE part_id={0} and project_id={1}",
-                            partIdToAllocate, Id),
-                            connection
-                        );
-
-                    bool doUpdate = false;
-
-                    using (SqlDataReader reader = allocationStatusCommand.ExecuteReader())
+                    if (allocateButton.CommandParameter is int partId)
                     {
-                        if (reader.Read())
+                        using (SqlConnection connection = new SqlConnection(Settings.GetConnection()))
                         {
-                            bool dataBaseAllocationValue = (int)reader["count"] == 1;
+                            connection.Open();
 
-                            if (partList.Single(part => part.Id == partIdToAllocate).IsAllocated == dataBaseAllocationValue)
-                            {
-                                doUpdate = true;
-                                partList.Single(part => part.Id == partIdToAllocate).IsAllocated = !partList.Single(part => part.Id == partIdToAllocate).IsAllocated;
-                            }
-                            else
-                            {
-                                partList.Single(part => part.Id == partIdToAllocate).IsAllocated = dataBaseAllocationValue;
-                            }
-                        }
-                        else
-                        {
-                            // Error because no count was returned
-                        }
-                    }
-
-                    if (doUpdate)
-                    {
-                        SqlCommand allocationChangeCommand;
-                        if (partList.Single(part => part.Id == partIdToAllocate).IsAllocated)
-                        {
-                            // Do Insert
-                            allocationChangeCommand =
+                            SqlCommand allocationStatusCommand =
                                 new SqlCommand(string.Format(
-                                    "INSERT INTO ALLOCATION (part_id, project_id) VALUES({0}, {1})",
-                                    partIdToAllocate, Id),
+                                    "SELECT COUNT(*) as count " +
+                                    "FROM ALLOCATION " +
+                                    "WHERE part_id={0} and project_id={1}",
+                                    partId, Id),
                                     connection
                                 );
-                        }
-                        else
-                        {
-                            // Do Delete
-                            allocationChangeCommand =
-                                new SqlCommand(string.Format(
-                                    "DELETE FROM ALLOCATION WHERE part_id = {0} and project_id = {1}",
-                                    partIdToAllocate, Id),
-                                    connection
-                                );
+
+                            bool doUpdate = false;
+
+                            using (SqlDataReader reader = allocationStatusCommand.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    bool dataBaseAllocationValue = (int)reader["count"] == 1;
+
+                                    if (partList.Single(part => part.Id == partId).IsAllocated == dataBaseAllocationValue)
+                                    {
+                                        doUpdate = true;
+                                        partList.Single(part => part.Id == partId).IsAllocated = !partList.Single(part => part.Id == partId).IsAllocated;
+                                    }
+                                    else
+                                    {
+                                        partList.Single(part => part.Id == partId).IsAllocated = dataBaseAllocationValue;
+                                    }
+                                }
+                                else
+                                {
+                                    // Error because no count was returned
+                                }
+                            }
+
+                            if (doUpdate)
+                            {
+                                SqlCommand allocationChangeCommand;
+                                if (partList.Single(part => part.Id == partId).IsAllocated)
+                                {
+                                    // Do Insert
+                                    allocationChangeCommand =
+                                        new SqlCommand(string.Format(
+                                            "INSERT INTO ALLOCATION (part_id, project_id) VALUES({0}, {1})",
+                                            partId, Id),
+                                            connection
+                                        );
+                                }
+                                else
+                                {
+                                    // Do Delete
+                                    allocationChangeCommand =
+                                        new SqlCommand(string.Format(
+                                            "DELETE FROM ALLOCATION WHERE part_id = {0} and project_id = {1}",
+                                            partId, Id),
+                                            connection
+                                        );
+                                }
+
+                                if (allocationChangeCommand.ExecuteNonQuery() != 1)
+                                {
+                                    // Need to revert since it already changed above
+                                    partList.Single(part => part.Id == partId).IsAllocated = !partList.Single(part => part.Id == partId).IsAllocated;
+
+                                    // Handle Error
+                                }
+                            }
                         }
 
-                        if (allocationChangeCommand.ExecuteNonQuery() != 1)
-                        {
-                            // Need to revert since it already changed above
-                            partList.Single(part => part.Id == partIdToAllocate).IsAllocated = !partList.Single(part => part.Id == partIdToAllocate).IsAllocated;
-
-                            // Handle Error
-                        }
+                        allocateButton.Command.Execute(System.Tuple.Create(Id, partId, partList.Single(part => part.Id == partId).Quantity, partList.Single(part => part.Id == partId).IsAllocated));
                     }
                 }
             }
         }
+
+        public ICommand AllocateCommand
+        {
+            get => (ICommand)GetValue(AllocateCommandProperty);
+            set
+            {
+                SetValue(AllocateCommandProperty, value);
+                NotifyPropertyChanged();
+            }
+        }
+
+        public static readonly DependencyProperty AllocateCommandProperty = DependencyProperty.Register("AllocateCommand", typeof(ICommand), typeof(MachineListItem));
 
         public int Id
         {

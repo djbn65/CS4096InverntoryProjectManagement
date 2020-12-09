@@ -88,6 +88,18 @@ namespace InventoryAndProjectManagement
             }
         }
 
+        private string _notEnoughPartsText;
+
+        public string NotEnoughPartsText
+        {
+            get => _notEnoughPartsText;
+            set
+            {
+                _notEnoughPartsText = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public int MachineOrPartIdToDelete { get; set; } = 0;
 
         public string MachineOrPartNameToDelete
@@ -158,6 +170,30 @@ namespace InventoryAndProjectManagement
             }
         }
 
+        private ICommand _allocatePartCommand;
+
+        public ICommand AllocatePartCommand
+        {
+            get => _allocatePartCommand;
+            set
+            {
+                _allocatePartCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private ICommand _closeCardCommand;
+
+        public ICommand CloseCardCommand
+        {
+            get => _closeCardCommand;
+            set
+            {
+                _closeCardCommand = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public string SearchText
         {
             get => PartsVisibility == Visibility.Visible ? _inventorySearchText : (MachineVisibility == Visibility.Visible ? _machinesSearchText : _projectSearchText);
@@ -181,7 +217,6 @@ namespace InventoryAndProjectManagement
             set
             {
                 _partsVis = value;
-
                 NotifyPropertyChanged();
             }
         }
@@ -423,64 +458,67 @@ namespace InventoryAndProjectManagement
         {
             if (aContent == "Projects")
             {
-                ProjectsVisibility = Visibility.Visible;
-                SearchText = _projectSearchText;
-
                 if (PageNum != null)
                 {
                     if (MachineVisibility == Visibility.Visible)
                     {
                         _pageNumMachines = (int)PageNum;
+                        _machinesSearchText = SearchText;
                     }
                     else
                     {
                         _pageNumParts = (int)PageNum;
+                        _inventorySearchText = SearchText;
                     }
                 }
 
+                ProjectsVisibility = Visibility.Visible;
                 MachineVisibility = PartsVisibility = Visibility.Hidden;
+                SearchText = _projectSearchText;
 
                 PageNum = _pageNumProjects;
             }
             else if (aContent == "Machines")
             {
-                MachineVisibility = Visibility.Visible;
-                SearchText = _machinesSearchText;
-
                 if (PageNum != null)
                 {
                     if (PartsVisibility == Visibility.Visible)
                     {
                         _pageNumParts = (int)PageNum;
+                        _inventorySearchText = SearchText;
                     }
                     else
                     {
                         _pageNumProjects = (int)PageNum;
+                        _projectSearchText = SearchText;
                     }
                 }
 
+                MachineVisibility = Visibility.Visible;
                 ProjectsVisibility = PartsVisibility = Visibility.Hidden;
+                SearchText = _machinesSearchText;
 
                 PageNum = _pageNumMachines;
             }
             else
             {
-                PartsVisibility = Visibility.Visible;
-                SearchText = _inventorySearchText;
-
                 if (PageNum != null)
                 {
                     if (MachineVisibility == Visibility.Visible)
                     {
                         _pageNumMachines = (int)PageNum;
+                        _machinesSearchText = SearchText;
                     }
                     else
                     {
                         _pageNumProjects = (int)PageNum;
+                        _projectSearchText = SearchText;
                     }
                 }
 
+                PartsVisibility = Visibility.Visible;
                 ProjectsVisibility = MachineVisibility = Visibility.Hidden;
+                SearchText = _inventorySearchText;
 
                 PageNum = _pageNumParts;
             }

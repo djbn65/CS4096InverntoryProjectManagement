@@ -95,6 +95,7 @@
     <Compile Include="NotEmptyValidationRule.cs" />
     <Compile Include="Part.cs" />
     <Compile Include="NullableIntToString.cs" />
+    <Compile Include="QuantityToVisibilityConverter.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="TitleToAbbrConverter.cs" />
